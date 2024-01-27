@@ -1,17 +1,24 @@
 from iperf import Iperf_Client
-# import iperf3
 from dotenv import load_dotenv
 import os
     
 HOST = os.getenv('IPERF_SERVER_ADDRESS')
-PORT = os.getenv('IPERF_PORT')
+PORT = int(os.getenv('IPERF_PORT'))
 
 def main():
     load_dotenv()
 
-    # client = iperf3.Client()
+    print (f"Testing on host {HOST}, port {PORT}")
+
     iperf_client = Iperf_Client(HOST, PORT)
-    print (iperf_client)
+    iperf_client.set_duration(5)
+    iperf_client.set_streams(1)
+    iperf_client.set_interval(0.5)
+    
+    result = iperf_client.run_test()
+
+    print (result)
+
     print ("YAY")
 
 

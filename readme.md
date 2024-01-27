@@ -11,5 +11,7 @@ A tool to run netowrk speed benchmarks and create graphs of the results.
 on an ARM Apple Machine to probably link required lib.
 
 ## Run
-1. Enter python shell with `pipenv --python 3.11` followed by `pipenv shell`
-2. run application with `python main.py` from root of project
+1. Start `iperf3` server on host machine with `iperf3 -s`
+2. Configure `.env` file on client with host IP and port of server
+3. Enter python shell with `pipenv --python 3.11` followed by `pipenv shell`
+4. run application with `python main.py` from root of project
