@@ -4,6 +4,7 @@ import os
 from bokeh.models import ColumnDataSource
 from bokeh.plotting import curdoc, figure
 import re
+from colorama import Fore, Back, Style
 
 HOST = os.getenv("IPERF_SERVER_ADDRESS")
 PORT = os.getenv("IPERF_PORT")
@@ -16,8 +17,8 @@ p = figure(
     x_axis_label="Time in Seconds",
     y_axis_label="Mbits / sec",
 )
-p.width=1200
-p.height=720
+p.width = 1200
+p.height = 720
 p.line(x="x", y="y", source=source, line_color="white")
 
 # store subprocess
@@ -27,7 +28,7 @@ first_point = True
 
 def main():
     load_dotenv()
-    print(f"Testing on host {HOST}, port {PORT}")
+    print(f"\033[32mTesting on host {HOST}, port {PORT}")
 
     curdoc().add_root(p)
     curdoc().add_periodic_callback(update, 0.5)
@@ -60,9 +61,11 @@ def update():
         data_x, data_y = parse_line(line)
         source.stream(dict(x=[data_x], y=[data_y]))
     except ParseException as e:
-        print(f"{e.message}, line = {e.line}")
+        print(f"\033[31m{e.message}, line = {e.line}")
+        print(Fore.GREEN)
     except UnboundLocalError as e:
-        print (f"Unbound Local Error- line has no value")
+        print(f"\033[31mUnbound Local Error- line has no value")
+        print(Fore.GREEN)
 
 
 def parse_line(line):
@@ -72,7 +75,6 @@ def parse_line(line):
     )
 
     if match:
-        # start_time = float(match.group(1))
         end_time = float(match.group(2))
         speed = float(match.group(3))
 
@@ -81,26 +83,12 @@ def parse_line(line):
     else:
         raise ParseException("Cannot Parse (probably start or end of data)", line)
 
+
 class ParseException(Exception):
     def __init__(self, message, line):
         self.line = line
         self.message = message
         super().__init__(message)
 
+
 main()
-
-
-"""
-DUMP
-
-    iperf_client = Iperf_Client(HOST, PORT)
-    iperf_client.set_duration(5)
-    iperf_client.set_streams(1)
-    iperf_client.set_interval(0.5)
-    
-    result = iperf_client.run_test()
-
-    print (result)
-
-    print ("YAY")
-"""
