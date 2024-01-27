@@ -53,6 +53,8 @@ def update():
                 settings["Interval"],
                 "-t",
                 settings["Test Length"],
+                "-f",
+                "m",
                 "--forceflush",
             ]
             process = subprocess.Popen(command, stdout=subprocess.PIPE)
