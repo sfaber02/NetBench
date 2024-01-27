@@ -26,3 +26,5 @@ A tool to run netowrk speed benchmarks and create graphs of the results.
 - add timestamp to each graph
 - create default filename for saving
 - make y axis lable dynamic based on units Mbits Mbytes etc
+- change iperf settings to use json and eliminate parsing
+- gracefully end test and graphing

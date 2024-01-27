@@ -26,6 +26,7 @@ def get_user_inputs():
 
 def get_input(field):
     global saved_settings
+    saved_settings = get_settings_from_disk()
     new_val = input(f"{field} (Current: {saved_settings[field]}): ")
     if len(new_val) > 0:
         saved_settings[field] = new_val
