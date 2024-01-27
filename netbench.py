@@ -1,43 +1,43 @@
 import subprocess
-from dotenv import load_dotenv
 import os
 from bokeh.models import ColumnDataSource
 from bokeh.plotting import curdoc, figure
 import re
-from colorama import Fore, Back, Style
+from colorama import Fore
 
 HOST = os.getenv("IPERF_SERVER_ADDRESS")
 PORT = os.getenv("IPERF_PORT")
 
-# Create column data source for plot
-source = ColumnDataSource(dict(x=[], y=[]))
-# Create plot
-p = figure(
-    title="Wired Connection Test",
-    x_axis_label="Time in Seconds",
-    y_axis_label="Mbits / sec",
-)
-p.width = 1200
-p.height = 720
-p.line(x="x", y="y", source=source, line_color="white")
-
 # store subprocess
 process = None
-first_point = True
+# Create column data source for plot
+source = ColumnDataSource(dict(x=[], y=[]))
 
 
-def main():
-    load_dotenv()
+def start():
     print(f"\033[32mTesting on host {HOST}, port {PORT}")
 
-    curdoc().add_root(p)
-    curdoc().add_periodic_callback(update, 0.5)
+    
+
+    # Create plot
+    plot = figure(
+        title="Wired Connection Test",
+        x_axis_label="Time in Seconds",
+        y_axis_label="Mbits / sec",
+    )
+    plot.width = 1200
+    plot.height = 720
+    plot.line(x="x", y="y", source=source, line_color="white")
+
     curdoc().theme = "dark_minimal"
+    curdoc().add_root(plot)
+    curdoc().add_periodic_callback(update, 0.5)
 
 
 def update():
     global process
-    global first_point
+    global source
+
     try:
         if process is None:
             command = [
@@ -53,10 +53,7 @@ def update():
                 "--forceflush",
             ]
             process = subprocess.Popen(command, stdout=subprocess.PIPE)
-        if not first_point:
-            line = process.stdout.readline().decode().strip()
-        else:
-            first_point = False
+        line = process.stdout.readline().decode().strip()
         # parse data here
         data_x, data_y = parse_line(line)
         source.stream(dict(x=[data_x], y=[data_y]))
@@ -91,4 +88,4 @@ class ParseException(Exception):
         super().__init__(message)
 
 
-main()
+start()
