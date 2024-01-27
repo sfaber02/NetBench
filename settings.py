@@ -4,27 +4,7 @@ saved_settings = {}
 
 def get_user_inputs():
     global saved_settings
-    try:
-        with open("./test_settings.json", "r") as saved_settings_file:
-            saved_settings = json.load(saved_settings_file)
-            print(saved_settings)
-    except FileNotFoundError:
-        print("No settings file found, creating one with default settings.")
-        saved_settings = {
-            "Title": "Bandwidth vs Time",
-            "X Axis Label": "Time in Seconds",
-            "Width": 800,
-            "Height": 600,
-            "Line Color": "white",
-            "Theme": "dark_minimal",
-            "Tags": [],
-            "Host": "127.0.0.0",
-            "Port": "5201",
-            "Interval": "0.1",
-            "Test Length": "60",
-        }
-        with open("./test_settings.json", "w") as saved_settings_file:
-            json.dump(saved_settings, saved_settings_file)
+    get_settings_from_disk()
 
     print(
         "Input Test Settings - No User Input Will Use Last Known Value or Default Value"
@@ -74,7 +54,7 @@ def get_settings_from_disk():
             "Line Color": "white",
             "Theme": "dark_minimal",
             "Tags": [],
-            "Host": "127.0.0.0",
+            "Host": "127.0.0.1",
             "Port": "5201",
             "Interval": "0.1",
             "Test Length": "60",

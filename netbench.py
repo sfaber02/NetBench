@@ -3,7 +3,7 @@ from bokeh.models import ColumnDataSource
 from bokeh.plotting import curdoc, figure
 import re
 from colorama import Fore
-from user_inputs import get_user_inputs, get_settings_from_disk
+from settings import get_user_inputs, get_settings_from_disk
 
 # store subprocess
 process = None
