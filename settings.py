@@ -4,7 +4,7 @@ saved_settings = {}
 
 def get_user_inputs():
     global saved_settings
-    get_settings_from_disk()
+    saved_settings = get_settings_from_disk()
 
     print(
         "Input Test Settings - No User Input Will Use Last Known Value or Default Value"

@@ -10,7 +10,7 @@ process = None
 # Create column data source for plot
 source = ColumnDataSource(dict(x=[], y=[]))
 # store settings
-settings = {}
+settings = get_settings_from_disk()
 
 
 def start():
@@ -19,8 +19,6 @@ def start():
     change_user_inputs = input("Change Test Settings? (Y or N)")
     if change_user_inputs == "y" or change_user_inputs == "Y":
         settings = get_user_inputs()
-    else:
-        settings = get_settings_from_disk()
 
     print(f"\033[32mTesting on host {settings['Host']}, port {settings['Port']}")
 
