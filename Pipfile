@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 gnuplotlib = "*"
 iperf3 = "*"
+python-dotenv = "*"
 
 [dev-packages]
 
