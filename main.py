@@ -1,4 +1,5 @@
 from iperf import Iperf_Client
+from plotting import plot
 import iperf3
 import subprocess
 from dotenv import load_dotenv
@@ -12,9 +13,9 @@ def main():
     load_dotenv()
     print(f"Testing on host {HOST}, port {PORT}")
 
+    # plot()
+
     command = [
-        "gstdbuf",
-        "-o0",
         "iperf3",
         "-c",
         HOST,
@@ -24,6 +25,7 @@ def main():
         "0.5",
         "-t",
         "10",
+        "--forceflush"
     ]
 
     process = subprocess.Popen(command, stdout=subprocess.PIPE, universal_newlines=True)

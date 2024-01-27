@@ -7,6 +7,8 @@ name = "pypi"
 gnuplotlib = "*"
 iperf3 = "*"
 python-dotenv = "*"
+plotly = "5.18.0"
+bokeh = "*"
 
 [dev-packages]
 
