@@ -16,7 +16,7 @@ A tool to run netowrk speed benchmarks and create graphs of the results.
 1. Start `iperf3` server on host machine with `iperf3 -s`
 ### Client
 1. Enter pipenv shell `pipenv shell` must be python > 3.11
-2. Start testing with `bokeh serve --show netbench.py` from root of project
+2. Start testing with `sh start-test.sh` from root of project
 
 ## Ideas
 - user inputs
