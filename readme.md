@@ -15,3 +15,9 @@ on an ARM Apple Machine to probably link required lib.
 2. Configure `.env` file on client with host IP and port of server
 3. Enter python shell with `pipenv --python 3.11` followed by `pipenv shell`
 4. run application with `python main.py` from root of project
+
+## Ideas
+- user inputs
+    - save to file and load last inputs as defaults
+- error / no data count
+- 

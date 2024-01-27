@@ -1,55 +1,60 @@
 import subprocess
-import os
 from bokeh.models import ColumnDataSource
 from bokeh.plotting import curdoc, figure
 import re
 from colorama import Fore
-
-HOST = os.getenv("IPERF_SERVER_ADDRESS")
-PORT = os.getenv("IPERF_PORT")
+from user_inputs import get_user_inputs, get_settings_from_disk
 
 # store subprocess
 process = None
 # Create column data source for plot
 source = ColumnDataSource(dict(x=[], y=[]))
+# store settings
+settings = {}
 
 
 def start():
-    print(f"\033[32mTesting on host {HOST}, port {PORT}")
+    global settings
 
-    
+    change_user_inputs = input("Change Test Settings? (Y or N)")
+    if change_user_inputs == "y" or change_user_inputs == "Y":
+        settings = get_user_inputs()
+    else:
+        settings = get_settings_from_disk()
+
+    print(f"\033[32mTesting on host {settings['Host']}, port {settings['Port']}")
 
     # Create plot
     plot = figure(
-        title="Wired Connection Test",
-        x_axis_label="Time in Seconds",
+        title=settings["Title"],
+        x_axis_label=settings["X Axis Label"],
         y_axis_label="Mbits / sec",
     )
-    plot.width = 1200
-    plot.height = 720
-    plot.line(x="x", y="y", source=source, line_color="white")
+    plot.width = int(settings["Width"])
+    plot.height = int(settings["Height"])
+    plot.line(x="x", y="y", source=source, line_color=settings["Line Color"])
 
-    curdoc().theme = "dark_minimal"
+    curdoc().theme = settings["Theme"]
     curdoc().add_root(plot)
     curdoc().add_periodic_callback(update, 0.5)
 
 
 def update():
+    global settings
     global process
     global source
-
     try:
         if process is None:
             command = [
                 "iperf3",
                 "-c",
-                HOST,
+                settings["Host"],
                 "-p",
-                PORT,
+                settings["Port"],
                 "-i",
-                "0.1",
+                settings["Interval"],
                 "-t",
-                "1000",
+                settings["Test Length"],
                 "--forceflush",
             ]
             process = subprocess.Popen(command, stdout=subprocess.PIPE)
@@ -67,6 +72,7 @@ def update():
 
 def parse_line(line):
     # Regular expression to match time and speed
+    # maybe new regex r"\[\s*\d+\]\s*([\d.]+)-([\d.]+)\s*sec.*\s*([\d.]+)\s*M?bits/sec"
     match = re.search(
         r"\[\s*\d+\]\s*([\d.]+)-([\d.]+)\s*sec.*\s([\d.]+)\s*Mbits/sec", line
     )
