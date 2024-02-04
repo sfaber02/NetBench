@@ -1,5 +1,5 @@
 # NetBench v 0.1
-A tool to run netowrk speed benchmarks and create graphs of the results.
+A tool to run network speed benchmarks and create graphs of the results.
 
 
 ## Installation
