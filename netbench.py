@@ -20,7 +20,7 @@ logging.basicConfig(filename="newfile.log",
                     filemode='w')
     
 logger=logging.getLogger()
-logger.setLEvel(logging.DEBUG)
+logger.setLevel(logging.CRITICAL)
 
 
 
@@ -80,10 +80,10 @@ def update():
         data_x, data_y = parse_line(line)
         source.stream(dict(x=[data_x], y=[data_y]))
     except ParseException as e:
-        logger.error(f"{e.message}, line={e.line}")
+        logger.critical(f"{e.message}, line={e.line}")
         #print(f"\033[31m{e.message}, line = {e.line}")
         #print(Fore.GREEN)
-    except UnboundLocalError:
+    except UnboundLocalError as e:
         logger.error("Unbound Local Error - line has no value")
         #print(f"\033[31mUnbound Local Error- line has no value")
         #print(Fore.GREEN)
