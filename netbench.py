@@ -80,11 +80,13 @@ def update():
         data_x, data_y = parse_line(line)
         source.stream(dict(x=[data_x], y=[data_y]))
     except ParseException as e:
-        print(f"\033[31m{e.message}, line = {e.line}")
-        print(Fore.GREEN)
-    except UnboundLocalError as e:
-        print(f"\033[31mUnbound Local Error- line has no value")
-        print(Fore.GREEN)
+        logger.error(f"{e.message}, line={e.line}")
+        #print(f"\033[31m{e.message}, line = {e.line}")
+        #print(Fore.GREEN)
+    except UnboundLocalError:
+        logger.error("Unbound Local Error - line has no value")
+        #print(f"\033[31mUnbound Local Error- line has no value")
+        #print(Fore.GREEN)
 
 
 def parse_line(line):
