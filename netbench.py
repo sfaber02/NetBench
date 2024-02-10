@@ -79,7 +79,7 @@ def update():
         data_x, data_y = parse_line(line)
         source.stream(dict(x=[data_x], y=[data_y]))
     except ParseException as e:
-        logger.critical(f"{e.message}, line={e.line}")
+        logger.debug(f"{e.message}, line={e.line}")
     except UnboundLocalError as e:
         logger.error(f"{e.message}, line={e.line}")
     except UnboundLocalError:
