@@ -31,7 +31,6 @@ def start():
 
     # Create plot
     plot = figure(
-        # title=settings["Title"],
         title=title_with_timestamp,
         x_axis_label=settings["X Axis Label"],
         y_axis_label="Mbits / sec",
@@ -73,7 +72,6 @@ def update():
     except ParseException as e:
         print(f"\033[31m{e.message}, line = {e.line}")
         print(Fore.GREEN)
-        pass
     except UnboundLocalError as e:
         print(f"\033[31mUnbound Local Error- line has no value")
         print(Fore.GREEN)
