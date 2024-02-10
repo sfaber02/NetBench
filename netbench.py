@@ -2,7 +2,6 @@ import subprocess
 from bokeh.models import ColumnDataSource
 from bokeh.plotting import curdoc, figure
 import re
-from colorama import Fore
 from settings import get_user_inputs, get_settings_from_disk
 from datetime import datetime
 import logging
@@ -81,12 +80,12 @@ def update():
         source.stream(dict(x=[data_x], y=[data_y]))
     except ParseException as e:
         logger.critical(f"{e.message}, line={e.line}")
-        #print(f"\033[31m{e.message}, line = {e.line}")
-        #print(Fore.GREEN)
     except UnboundLocalError as e:
+        logger.error(f"{e.message}, line={e.line}")
+    except UnboundLocalError:
+        logger.error(f"{e.message}, line={e.line}")
+    except UnboundLocalError:
         logger.error("Unbound Local Error - line has no value")
-        #print(f"\033[31mUnbound Local Error- line has no value")
-        #print(Fore.GREEN)
 
 
 def parse_line(line):
