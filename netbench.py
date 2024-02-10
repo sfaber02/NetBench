@@ -5,6 +5,7 @@ import re
 from colorama import Fore
 from settings import get_user_inputs, get_settings_from_disk
 from datetime import datetime
+import logging
 
 # store subprocess
 process = None
@@ -12,6 +13,15 @@ process = None
 source = ColumnDataSource(dict(x=[], y=[]))
 # store settings
 settings = get_settings_from_disk()
+
+# Create and configure logger
+logging.basicConfig(filename="newfile.log",
+                    format='%(asctime)s %(message)s',
+                    filemode='w')
+    
+logger=logging.getLogger()
+logger.setLEvel(logging.DEBUG)
+
 
 
 def start():
