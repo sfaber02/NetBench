@@ -4,6 +4,7 @@ from bokeh.plotting import curdoc, figure
 import re
 from colorama import Fore
 from settings import get_user_inputs, get_settings_from_disk
+from datetime import datetime
 
 # store subprocess
 process = None
@@ -22,9 +23,15 @@ def start():
 
     print(f"\033[32mTesting on host {settings['Host']}, port {settings['Port']}")
 
+    #get current timestamp
+    current_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    #combine timestamp with title
+    title_with_timestamp = f"{settings['Title']} - {current_timestamp}"
+
     # Create plot
     plot = figure(
-        title=settings["Title"],
+        title=title_with_timestamp,
         x_axis_label=settings["X Axis Label"],
         y_axis_label="Mbits / sec",
     )
