@@ -1,7 +1,5 @@
 #  lib = cdll.LoadLibrary("/Users/shawn/dev/netbench/iperf/lib/libiperf.0.dylib")
 
-
-
 # -*- coding: utf-8 -*-
 """
 Python wrapper for the iperf3 libiperf.so.0 library. The module consists of two
@@ -34,9 +32,7 @@ try:
 except ImportError:
     from Queue import Queue  # Python2 compatibility
 
-
 __version__ = '0.1.11'
-
 
 MAX_UDP_BULKSIZE = (65535 - 8 - 20)
 
@@ -90,10 +86,8 @@ class IPerf3(object):
 
     .. note:: You should not use this class directly
     """
-    def __init__(self,
-                 role,
-                 verbose=True,
-                 lib_name=None):
+
+    def __init__(self, role, verbose=True, lib_name=None):
         """Initialise the iperf shared library
 
         :param role: 'c' = client; 's' = server
@@ -107,98 +101,134 @@ class IPerf3(object):
         #          lib_name = 'libiperf.so.0'
 
         try:
-            self.lib = cdll.LoadLibrary("/Users/shawn/dev/netbench/iperf/lib/libiperf.0.dylib")
+            self.lib = cdll.LoadLibrary(
+                "/Users/shawn/dev/netbench/iperf/lib/libiperf.0.dylib")
         except OSError:
             raise OSError(
                 "Couldn't find shared library {}, is iperf3 installed?".format(
-                    lib_name
-                )
-            )
+                    lib_name))
 
         # Set the appropriate C types.
         self.lib.iperf_client_end.restype = c_int
-        self.lib.iperf_client_end.argtypes = (c_void_p,)
+        self.lib.iperf_client_end.argtypes = (c_void_p, )
         self.lib.iperf_free_test.restxpe = None
-        self.lib.iperf_free_test.argtypes = (c_void_p,)
+        self.lib.iperf_free_test.argtypes = (c_void_p, )
         self.lib.iperf_new_test.restype = c_void_p
         self.lib.iperf_new_test.argtypes = None
         self.lib.iperf_defaults.restype = c_int
-        self.lib.iperf_defaults.argtypes = (c_void_p,)
+        self.lib.iperf_defaults.argtypes = (c_void_p, )
         self.lib.iperf_get_test_role.restype = c_char
-        self.lib.iperf_get_test_role.argtypes = (c_void_p,)
+        self.lib.iperf_get_test_role.argtypes = (c_void_p, )
         self.lib.iperf_set_test_role.restype = None
-        self.lib.iperf_set_test_role.argtypes = (c_void_p, c_char,)
+        self.lib.iperf_set_test_role.argtypes = (
+            c_void_p,
+            c_char,
+        )
         self.lib.iperf_get_test_bind_address.restype = c_char_p
-        self.lib.iperf_get_test_bind_address.argtypes = (c_void_p,)
+        self.lib.iperf_get_test_bind_address.argtypes = (c_void_p, )
         self.lib.iperf_set_test_bind_address.restype = None
-        self.lib.iperf_set_test_bind_address.argtypes = (c_void_p, c_char_p,)
+        self.lib.iperf_set_test_bind_address.argtypes = (
+            c_void_p,
+            c_char_p,
+        )
         self.lib.iperf_get_test_server_port.restype = c_int
-        self.lib.iperf_get_test_server_port.argtypes = (c_void_p,)
+        self.lib.iperf_get_test_server_port.argtypes = (c_void_p, )
         self.lib.iperf_set_test_server_port.restype = None
-        self.lib.iperf_set_test_server_port.argtypes = (c_void_p, c_int,)
+        self.lib.iperf_set_test_server_port.argtypes = (
+            c_void_p,
+            c_int,
+        )
         self.lib.iperf_get_test_json_output.restype = c_int
-        self.lib.iperf_get_test_json_output.argtypes = (c_void_p,)
+        self.lib.iperf_get_test_json_output.argtypes = (c_void_p, )
         self.lib.iperf_set_test_json_output.restype = None
-        self.lib.iperf_set_test_json_output.argtypes = (c_void_p, c_int,)
+        self.lib.iperf_set_test_json_output.argtypes = (
+            c_void_p,
+            c_int,
+        )
         self.lib.iperf_get_verbose.restype = c_int
-        self.lib.iperf_get_verbose.argtypes = (c_void_p,)
+        self.lib.iperf_get_verbose.argtypes = (c_void_p, )
         self.lib.iperf_set_verbose.restype = None
         self.lib.iperf_set_verbose.argtypes = (c_void_p, c_int)
         self.lib.iperf_strerror.restype = c_char_p
-        self.lib.iperf_strerror.argtypes = (c_int,)
+        self.lib.iperf_strerror.argtypes = (c_int, )
         self.lib.iperf_get_test_server_hostname.restype = c_char_p
-        self.lib.iperf_get_test_server_hostname.argtypes = (c_void_p,)
+        self.lib.iperf_get_test_server_hostname.argtypes = (c_void_p, )
         self.lib.iperf_set_test_server_hostname.restype = None
         self.lib.iperf_set_test_server_hostname.argtypes = (
-            c_void_p, c_char_p,
+            c_void_p,
+            c_char_p,
         )
         self.lib.iperf_get_test_protocol_id.restype = c_int
-        self.lib.iperf_get_test_protocol_id.argtypes = (c_void_p,)
+        self.lib.iperf_get_test_protocol_id.argtypes = (c_void_p, )
         self.lib.set_protocol.restype = c_int
-        self.lib.set_protocol.argtypes = (c_void_p, c_int,)
+        self.lib.set_protocol.argtypes = (
+            c_void_p,
+            c_int,
+        )
         self.lib.iperf_get_test_omit.restype = c_int
-        self.lib.iperf_get_test_omit.argtypes = (c_void_p,)
+        self.lib.iperf_get_test_omit.argtypes = (c_void_p, )
         self.lib.iperf_set_test_omit.restype = None
-        self.lib.iperf_set_test_omit.argtypes = (c_void_p, c_int,)
+        self.lib.iperf_set_test_omit.argtypes = (
+            c_void_p,
+            c_int,
+        )
         self.lib.iperf_get_test_duration.restype = c_int
-        self.lib.iperf_get_test_duration.argtypes = (c_void_p,)
+        self.lib.iperf_get_test_duration.argtypes = (c_void_p, )
         self.lib.iperf_set_test_duration.restype = None
-        self.lib.iperf_set_test_duration.argtypes = (c_void_p, c_int,) 
+        self.lib.iperf_set_test_duration.argtypes = (
+            c_void_p,
+            c_int,
+        )
         #  self.lib.iperf_get_test_interval.restype = c_int
         #  self.lib.iperf_get_test_interval.argtypes = (c_void_p,)
         #  self.lib.iperf_set_test_interval.restype = None
         #  self.lib.iperf_set_test_interval.argtypes = (c_void_p, c_int,)
         self.lib.iperf_get_test_rate.restype = c_uint64
-        self.lib.iperf_get_test_rate.argtypes = (c_void_p,)
+        self.lib.iperf_get_test_rate.argtypes = (c_void_p, )
         self.lib.iperf_set_test_rate.restype = None
-        self.lib.iperf_set_test_rate.argtypes = (c_void_p, c_uint64,)
+        self.lib.iperf_set_test_rate.argtypes = (
+            c_void_p,
+            c_uint64,
+        )
         self.lib.iperf_get_test_blksize.restype = c_int
-        self.lib.iperf_get_test_blksize.argtypes = (c_void_p,)
+        self.lib.iperf_get_test_blksize.argtypes = (c_void_p, )
         self.lib.iperf_set_test_blksize.restype = None
-        self.lib.iperf_set_test_blksize.argtypes = (c_void_p, c_int,)
+        self.lib.iperf_set_test_blksize.argtypes = (
+            c_void_p,
+            c_int,
+        )
         self.lib.iperf_get_test_num_streams.restype = c_int
-        self.lib.iperf_get_test_num_streams.argtypes = (c_void_p,)
+        self.lib.iperf_get_test_num_streams.argtypes = (c_void_p, )
         self.lib.iperf_set_test_num_streams.restype = None
-        self.lib.iperf_set_test_num_streams.argtypes = (c_void_p, c_int,)
+        self.lib.iperf_set_test_num_streams.argtypes = (
+            c_void_p,
+            c_int,
+        )
         self.lib.iperf_has_zerocopy.restype = c_int
         self.lib.iperf_has_zerocopy.argtypes = None
         self.lib.iperf_set_test_zerocopy.restype = None
-        self.lib.iperf_set_test_zerocopy.argtypes = (c_void_p, c_int,)
+        self.lib.iperf_set_test_zerocopy.argtypes = (
+            c_void_p,
+            c_int,
+        )
         self.lib.iperf_get_test_reverse.restype = c_int
-        self.lib.iperf_get_test_reverse.argtypes = (c_void_p,)
+        self.lib.iperf_get_test_reverse.argtypes = (c_void_p, )
         self.lib.iperf_set_test_reverse.restype = None
-        self.lib.iperf_set_test_reverse.argtypes = (c_void_p, c_int,)
+        self.lib.iperf_set_test_reverse.argtypes = (
+            c_void_p,
+            c_int,
+        )
         self.lib.iperf_run_client.restype = c_int
-        self.lib.iperf_run_client.argtypes = (c_void_p,)
+        self.lib.iperf_run_client.argtypes = (c_void_p, )
         self.lib.iperf_run_server.restype = c_int
-        self.lib.iperf_run_server.argtypes = (c_void_p,)
+        self.lib.iperf_run_server.argtypes = (c_void_p, )
         self.lib.iperf_reset_test.restype = None
-        self.lib.iperf_reset_test.argtypes = (c_void_p,)
+        self.lib.iperf_reset_test.argtypes = (c_void_p, )
 
         try:
             # Only available from iperf v3.1 and onwards
             self.lib.iperf_get_test_json_output_string.restype = c_char_p
-            self.lib.iperf_get_test_json_output_string.argtypes = (c_void_p,)
+            self.lib.iperf_get_test_json_output_string.argtypes = (c_void_p, )
         except AttributeError:
             pass
 
@@ -259,22 +289,18 @@ class IPerf3(object):
         :rtype: 'c' or 's'
         """
         try:
-            self._role = c_char(
-                self.lib.iperf_get_test_role(self._test)
-            ).value.decode('utf-8')
+            self._role = c_char(self.lib.iperf_get_test_role(
+                self._test)).value.decode('utf-8')
         except TypeError:
-            self._role = c_char(
-                chr(self.lib.iperf_get_test_role(self._test))
-            ).value.decode('utf-8')
+            self._role = c_char(chr(self.lib.iperf_get_test_role(
+                self._test))).value.decode('utf-8')
         return self._role
 
     @role.setter
     def role(self, role):
         if role.lower() in ['c', 's']:
-            self.lib.iperf_set_test_role(
-                self._test,
-                c_char(role.lower().encode('utf-8'))
-            )
+            self.lib.iperf_set_test_role(self._test,
+                                         c_char(role.lower().encode('utf-8')))
             self._role = role
         else:
             raise ValueError("Unknown role, accepted values are 'c' and 's'")
@@ -286,9 +312,8 @@ class IPerf3(object):
         use * to listen on all available IPs
         :rtype: string
         """
-        result = c_char_p(
-            self.lib.iperf_get_test_bind_address(self._test)
-        ).value
+        result = c_char_p(self.lib.iperf_get_test_bind_address(
+            self._test)).value
         if result:
             self._bind_address = result.decode('utf-8')
         else:
@@ -298,10 +323,8 @@ class IPerf3(object):
 
     @bind_address.setter
     def bind_address(self, address):
-        self.lib.iperf_set_test_bind_address(
-            self._test,
-            c_char_p(address.encode('utf-8'))
-        )
+        self.lib.iperf_set_test_bind_address(self._test,
+                                             c_char_p(address.encode('utf-8')))
         self._bind_address = address
 
     @property
@@ -444,9 +467,8 @@ class Client(IPerf3):
 
         :rtype: string
         """
-        result = c_char_p(
-            self.lib.iperf_get_test_server_hostname(self._test)
-        ).value
+        result = c_char_p(self.lib.iperf_get_test_server_hostname(
+            self._test)).value
         if result:
             self._server_hostname = result.decode('utf-8')
         else:
@@ -456,9 +478,7 @@ class Client(IPerf3):
     @server_hostname.setter
     def server_hostname(self, hostname):
         self.lib.iperf_set_test_server_hostname(
-            self._test,
-            c_char_p(hostname.encode('utf-8'))
-        )
+            self._test, c_char_p(hostname.encode('utf-8')))
         self._server_hostname = hostname
 
     @property
@@ -512,7 +532,6 @@ class Client(IPerf3):
         """Change frequency of test packet"""
         self._interval = self.lib.iperf_get_test_interval(self._test)
         return self._interval
-
 
     @duration.setter
     def interval(self, interval):
@@ -641,8 +660,8 @@ class Client(IPerf3):
                     data = '{' + data.split('{', 1)[1]
             else:
                 data = c_char_p(
-                    self.lib.iperf_get_test_json_output_string(self._test)
-                ).value
+                    self.lib.iperf_get_test_json_output_string(
+                        self._test)).value
                 if data:
                     data = data.decode('utf-8')
 
@@ -709,9 +728,8 @@ class Server(IPerf3):
         if self.json_output:
             data_queue = Queue()
 
-            t = threading.Thread(
-                target=_run_in_thread, args=[self, data_queue]
-            )
+            t = threading.Thread(target=_run_in_thread,
+                                 args=[self, data_queue])
             t.daemon = True
 
             t.start()
@@ -902,8 +920,6 @@ class TestResult(object):
     def __repr__(self):
         """Print the result as received from iperf3"""
         return self.text
-
-
 
 
 iperf = IPerf3('c')

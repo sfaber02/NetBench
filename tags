@@ -1,0 +1,107 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+Client	iperf.py	/^class Client(IPerf3):$/;"	c	language:Python
+Client	iperf_client_test.py	/^from iperf import Client$/;"	i	language:Python
+ColumnDataSource	netbench.py	/^from bokeh.models import ColumnDataSource$/;"	i	language:Python
+Fore	netbench.py	/^from colorama import Fore$/;"	i	language:Python
+IPerf3	iperf.py	/^class IPerf3(object):$/;"	c	language:Python
+MAX_UDP_BULKSIZE	iperf.py	/^MAX_UDP_BULKSIZE = (65535 - 8 - 20)$/;"	v	language:Python
+ParseException	netbench.py	/^class ParseException(Exception):$/;"	c	language:Python
+Python2	iperf.py	/^    from Queue import Queue  # Python2 compatibility$/;"	i	language:Python
+Queue	iperf.py	/^    from Queue import Queue  # Python2 compatibility$/;"	i	language:Python
+Queue	iperf.py	/^    from queue import Queue$/;"	i	language:Python
+SOCK_DGRAM	iperf.py	/^from socket import SOCK_DGRAM, SOCK_STREAM$/;"	i	language:Python
+SOCK_STREAM	iperf.py	/^from socket import SOCK_DGRAM, SOCK_STREAM$/;"	i	language:Python
+Server	iperf.py	/^class Server(IPerf3):$/;"	c	language:Python
+TestResult	iperf.py	/^class TestResult(object):$/;"	c	language:Python
+__del__	iperf.py	/^    def __del__(self):$/;"	m	language:Python	class:IPerf3	file:
+__init__	iperf.py	/^    def __init__(self, *args, **kwargs):$/;"	m	language:Python	class:Client
+__init__	iperf.py	/^    def __init__(self, *args, **kwargs):$/;"	m	language:Python	class:Server
+__init__	iperf.py	/^    def __init__(self, result):$/;"	m	language:Python	class:TestResult
+__init__	iperf.py	/^    def __init__(self, role, verbose=True, lib_name=None):$/;"	m	language:Python	class:IPerf3
+__init__	netbench.py	/^    def __init__(self, message, line):$/;"	m	language:Python	class:ParseException
+__repr__	iperf.py	/^    def __repr__(self):$/;"	m	language:Python	class:TestResult	file:
+__version__	iperf.py	/^__version__ = '0.1.11'$/;"	v	language:Python
+_errno	iperf.py	/^    def _errno(self):$/;"	m	language:Python	class:IPerf3
+_error_to_string	iperf.py	/^    def _error_to_string(self, error_id):$/;"	m	language:Python	class:IPerf3
+_new	iperf.py	/^    def _new(self):$/;"	m	language:Python	class:IPerf3
+_run_in_thread	iperf.py	/^        def _run_in_thread(self, data_queue):$/;"	f	language:Python	function:Server.run
+bandwidth	iperf.py	/^    def bandwidth(self):$/;"	m	language:Python	class:Client
+bandwidth	iperf.py	/^    def bandwidth(self, bandwidth):$/;"	m	language:Python	class:Client
+bind_address	iperf.py	/^    def bind_address(self):$/;"	m	language:Python	class:IPerf3
+bind_address	iperf.py	/^    def bind_address(self, address):$/;"	m	language:Python	class:IPerf3
+blksize	iperf.py	/^    def blksize(self):$/;"	m	language:Python	class:Client
+blksize	iperf.py	/^    def blksize(self, bulksize):$/;"	m	language:Python	class:Client
+bulksize	iperf.py	/^    def bulksize(self):$/;"	m	language:Python	class:Client
+bulksize	iperf.py	/^    def bulksize(self, bulksize):$/;"	m	language:Python	class:Client
+c_char	iperf.py	/^from ctypes import util, cdll, c_char_p, c_int, c_char, c_void_p, c_uint64$/;"	i	language:Python
+c_char_p	iperf.py	/^from ctypes import util, cdll, c_char_p, c_int, c_char, c_void_p, c_uint64$/;"	i	language:Python
+c_int	iperf.py	/^from ctypes import util, cdll, c_char_p, c_int, c_char, c_void_p, c_uint64$/;"	i	language:Python
+c_uint64	iperf.py	/^from ctypes import util, cdll, c_char_p, c_int, c_char, c_void_p, c_uint64$/;"	i	language:Python
+c_void_p	iperf.py	/^from ctypes import util, cdll, c_char_p, c_int, c_char, c_void_p, c_uint64$/;"	i	language:Python
+cdll	iperf.py	/^from ctypes import util, cdll, c_char_p, c_int, c_char, c_void_p, c_uint64$/;"	i	language:Python
+compatibility	iperf.py	/^    from Queue import Queue  # Python2 compatibility$/;"	i	language:Python
+curdoc	netbench.py	/^from bokeh.plotting import curdoc, figure$/;"	i	language:Python
+datetime	netbench.py	/^from datetime import datetime$/;"	i	language:Python
+defaults	iperf.py	/^    def defaults(self):$/;"	m	language:Python	class:IPerf3
+duration	iperf.py	/^    def duration(self):$/;"	m	language:Python	class:Client
+duration	iperf.py	/^    def duration(self, duration):$/;"	m	language:Python	class:Client
+figure	netbench.py	/^from bokeh.plotting import curdoc, figure$/;"	i	language:Python
+get_input	settings.py	/^def get_input(field):$/;"	f	language:Python
+get_settings_from_disk	netbench.py	/^from settings import get_user_inputs, get_settings_from_disk$/;"	i	language:Python
+get_settings_from_disk	settings.py	/^def get_settings_from_disk():$/;"	f	language:Python
+get_user_inputs	netbench.py	/^from settings import get_user_inputs, get_settings_from_disk$/;"	i	language:Python
+get_user_inputs	settings.py	/^def get_user_inputs():$/;"	f	language:Python
+interval	iperf.py	/^    def interval(self, interval):$/;"	m	language:Python	class:Client
+iperf	iperf.py	/^iperf = IPerf3('c')$/;"	v	language:Python
+iperf_version	iperf.py	/^    def iperf_version(self):$/;"	m	language:Python	class:IPerf3
+json	iperf.py	/^import json$/;"	i	language:Python
+json	settings.py	/^import json$/;"	i	language:Python
+json_output	iperf.py	/^    def json_output(self):$/;"	m	language:Python	class:IPerf3
+json_output	iperf.py	/^    def json_output(self, enabled):$/;"	m	language:Python	class:IPerf3
+main	iperf_client_test.py	/^def main():$/;"	f	language:Python
+more_data	iperf.py	/^def more_data(pipe_out):$/;"	f	language:Python
+num_streams	iperf.py	/^    def num_streams(self):$/;"	m	language:Python	class:Client
+num_streams	iperf.py	/^    def num_streams(self, number):$/;"	m	language:Python	class:Client
+omit	iperf.py	/^    def omit(self):$/;"	m	language:Python	class:Client
+omit	iperf.py	/^    def omit(self, omit):$/;"	m	language:Python	class:Client
+os	iperf.py	/^import os$/;"	i	language:Python
+output_to_pipe	iperf.py	/^def output_to_pipe(pipe_in):$/;"	f	language:Python
+output_to_screen	iperf.py	/^def output_to_screen(stdout_fd, stderr_fd):$/;"	f	language:Python
+parse_line	netbench.py	/^def parse_line(line):$/;"	f	language:Python
+port	iperf.py	/^    def port(self):$/;"	m	language:Python	class:IPerf3
+port	iperf.py	/^    def port(self, port):$/;"	m	language:Python	class:IPerf3
+process	netbench.py	/^process = None$/;"	v	language:Python
+protocol	iperf.py	/^    def protocol(self):$/;"	m	language:Python	class:Client
+protocol	iperf.py	/^    def protocol(self, protocol):$/;"	m	language:Python	class:Client
+re	netbench.py	/^import re$/;"	i	language:Python
+read_pipe	iperf.py	/^def read_pipe(pipe_out):$/;"	f	language:Python
+reverse	iperf.py	/^    def reverse(self):$/;"	m	language:Python	class:Client
+reverse	iperf.py	/^    def reverse(self):$/;"	m	language:Python	class:TestResult
+reverse	iperf.py	/^    def reverse(self, enabled):$/;"	m	language:Python	class:Client
+role	iperf.py	/^    def role(self):$/;"	m	language:Python	class:IPerf3
+role	iperf.py	/^    def role(self, role):$/;"	m	language:Python	class:IPerf3
+run	iperf.py	/^    def run(self):$/;"	m	language:Python	class:Client
+run	iperf.py	/^    def run(self):$/;"	m	language:Python	class:IPerf3
+run	iperf.py	/^    def run(self):$/;"	m	language:Python	class:Server
+save_settings_to_disk	settings.py	/^def save_settings_to_disk():$/;"	f	language:Python
+saved_settings	settings.py	/^saved_settings = {}$/;"	v	language:Python
+select	iperf.py	/^import select$/;"	i	language:Python
+server_hostname	iperf.py	/^    def server_hostname(self):$/;"	m	language:Python	class:Client
+server_hostname	iperf.py	/^    def server_hostname(self, hostname):$/;"	m	language:Python	class:Client
+settings	netbench.py	/^settings = get_settings_from_disk()$/;"	v	language:Python
+source	netbench.py	/^source = ColumnDataSource(dict(x=[], y=[]))$/;"	v	language:Python
+start	netbench.py	/^def start():$/;"	f	language:Python
+subprocess	netbench.py	/^import subprocess$/;"	i	language:Python
+threading	iperf.py	/^import threading$/;"	i	language:Python
+type	iperf.py	/^    def type(self):$/;"	m	language:Python	class:TestResult
+update	netbench.py	/^def update():$/;"	f	language:Python
+util	iperf.py	/^from ctypes import util, cdll, c_char_p, c_int, c_char, c_void_p, c_uint64$/;"	i	language:Python
+verbose	iperf.py	/^    def verbose(self):$/;"	m	language:Python	class:IPerf3
+verbose	iperf.py	/^    def verbose(self, enabled):$/;"	m	language:Python	class:IPerf3
+zerocopy	iperf.py	/^    def zerocopy(self):$/;"	m	language:Python	class:Client
+zerocopy	iperf.py	/^    def zerocopy(self, enabled):$/;"	m	language:Python	class:Client
