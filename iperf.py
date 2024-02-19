@@ -104,7 +104,6 @@ class IPerf3(object):
         try:
             self.lib = cdll.LoadLibrary(
                 "/Users/shawn/dev/netbench/iperf/lib/libiperf.0.dylib")
-            print("Library Loaded")
         except OSError:
             raise OSError(
                 "Couldn't find shared library {}, is iperf3 installed?".format(
@@ -147,6 +146,10 @@ class IPerf3(object):
             c_void_p,
             c_int,
         )
+       
+        
+        self.lib.iperf_set_test_json_stream.argtypes = (c_void_p, c_int);
+        self.lib.iperf_set_test_json_stream.restype= None; 
         self.lib.iperf_get_verbose.restype = c_int
         self.lib.iperf_get_verbose.argtypes = (c_void_p, )
         self.lib.iperf_set_verbose.restype = None
@@ -364,8 +367,35 @@ class IPerf3(object):
             self.lib.iperf_set_test_json_output(self._test, 1)
         else:
             self.lib.iperf_set_test_json_output(self._test, 0)
-
+        print(f"JSON OUTPUT FLAG = {enabled}")
         self._json_output = enabled
+
+    @property
+    def json_stream_output(self):
+        """Toggles json output of libiperf
+
+        Turning this off will output the iperf3 instance results to
+        stdout/stderr
+
+        :rtype: bool
+        """
+        # enabled = self.lib.iperf_get_test_json_output(self._test)
+
+        # if enabled:
+            # self._json_output = True
+        # else:
+            # self._json_output = False
+
+        return self._json_stream_output
+
+    @json_stream_output.setter
+    def json_stream_output(self, enabled):
+        if enabled:
+            self.lib.iperf_set_test_json_stream(self._test, 1)
+        else:
+            self.lib.iperf_set_test_json_stream(self._test, 0)
+        print(f"JSON STREAM FLAG = {enabled}")
+        self._json_stream_output = enabled
 
     @property
     def verbose(self):
