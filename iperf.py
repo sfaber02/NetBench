@@ -20,7 +20,7 @@ To get started quickly see the :ref:`examples` page.
 .. moduleauthor:: Mathijs Mortimer <mathijs@mortimer.nl>
 """
 
-from ctypes import util, cdll, c_char_p, c_int, c_char, c_void_p, c_uint64
+from ctypes import util, cdll, c_char_p, c_int, c_char, c_void_p, c_uint64, c_double
 import os
 import select
 import json
@@ -77,6 +77,7 @@ def output_to_screen(stdout_fd, stderr_fd):
     :param stdout_fd: The stdout file descriptor
     :param stderr_fd: The stderr file descriptor
     """
+    print(f"{stdout_fd}")
     os.dup2(stdout_fd, 1)
     # os.dup2(stderr_fd, 2)
 
@@ -180,10 +181,10 @@ class IPerf3(object):
             c_void_p,
             c_int,
         )
-        #  self.lib.iperf_get_test_interval.restype = c_int
-        #  self.lib.iperf_get_test_interval.argtypes = (c_void_p,)
-        #  self.lib.iperf_set_test_interval.restype = None
-        #  self.lib.iperf_set_test_interval.argtypes = (c_void_p, c_int,)
+        self.lib.iperf_set_test_reporter_interval.restype = None
+        self.lib.iperf_set_test_reporter_interval.argtypes = (c_void_p, c_double,)
+        self.lib.iperf_set_test_stats_interval.restype = None
+        self.lib.iperf_set_test_stats_interval.argtypes = (c_void_p, c_double,)
         self.lib.iperf_get_test_rate.restype = c_uint64
         self.lib.iperf_get_test_rate.argtypes = (c_void_p, )
         self.lib.iperf_set_test_rate.restype = None
@@ -528,22 +529,35 @@ class Client(IPerf3):
         self._duration = self.lib.iperf_get_test_duration(self._test)
         return self._duration
 
-    @property
-    def interval(self, interval):
-        """Change frequency of test packet"""
-        self._interval = self.lib.iperf_get_test_interval(self._test)
-        return self._interval
-
-    @duration.setter
-    def interval(self, interval):
-        self.lib.iperf_set_test_interval(self._test, interval)
-        self._interval = interval
-
     @duration.setter
     def duration(self, duration):
         self.lib.iperf_set_test_duration(self._test, duration)
         self._duration = duration
 
+    @property
+    def test_reporter_interval(self, interval):
+        """Change frequency of test packet"""
+        pass                      
+        # self._test_reporter_interval = self.lib.iperf_get_test_interval(self._test)
+        # return self._interval
+
+    @test_reporter_interval.setter
+    def test_reporter_interval(self, interval):
+        self.lib.iperf_set_test_reporter_interval(self._test, interval)
+        self._test_reporter_interval = interval
+        print(f"Test Reporter Interval = {self._test_reporter_interval}")
+
+    @property
+    def test_stats_interval(self, interval):
+        """Change frequency of test packet"""
+        pass                      
+        # self._test_reporter_interval = self.lib.iperf_get_test_interval(self._test)
+        # return self._interval
+
+    @test_stats_interval.setter
+    def test_stats_interval(self, interval):
+        self.lib.iperf_set_test_stats_interval(self._test, interval)
+        self._test_stats_interval = interval
     @property
     def bandwidth(self):
         """Target bandwidth in bits/sec"""
@@ -652,7 +666,7 @@ class Client(IPerf3):
         :rtype: instance of :class:`TestResult`
         """
         if self.json_output:
-            output_to_pipe(self._pipe_in)  # Disable stdout
+            # output_to_pipe(self._pipe_in)  # Disable stdout
             error = self.lib.iperf_run_client(self._test)
 
             if not self.iperf_version.startswith('iperf 3.1'):
@@ -668,82 +682,11 @@ class Client(IPerf3):
 
             output_to_screen(self._stdout_fd, self._stderr_fd)  # enable stdout
 
-            if not data or error:
-                data = '{"error": "%s"}' % self._error_to_string(self._errno)
+            # if not data or error:
+                # data = '{"error": "%s"}' % self._error_to_string(self._errno)
 
             return TestResult(data)
 
-
-class Server(IPerf3):
-    """An iperf3 server connection.
-
-    This starts an iperf3 server session. The server terminates after each
-    succesful client connection so it might be useful to run Server.run()
-    in a loop.
-
-    The C function iperf_run_server is called in a seperate thread to make
-    sure KeyboardInterrupt(aka ctrl+c) can still be captured
-
-    Basic Usage::
-
-      >>> import iperf3
-
-      >>> server = iperf3.Server()
-      >>> server.run()
-      {'start': {...
-    """
-
-    def __init__(self, *args, **kwargs):
-        """Initialise the iperf3 server instance"""
-        super(Server, self).__init__(role='s', *args, **kwargs)
-
-    def run(self):
-        """Run the iperf3 server instance.
-
-        :rtype: instance of :class:`TestResult`
-        """
-
-        def _run_in_thread(self, data_queue):
-            """Runs the iperf_run_server
-
-            :param data_queue: thread-safe queue
-            """
-            output_to_pipe(self._pipe_in)  # disable stdout
-            error = self.lib.iperf_run_server(self._test)
-            output_to_screen(self._stdout_fd, self._stderr_fd)  # enable stdout
-
-            # TODO json_output_string not available on earlier iperf3 builds
-            # have to build in a version check using self.iperf_version
-            # The following line should work on later versions:
-            # data = c_char_p(
-            #    self.lib.iperf_get_test_json_output_string(self._test)
-            # ).value
-            data = read_pipe(self._pipe_out)
-
-            if not data or error:
-                data = '{"error": "%s"}' % self._error_to_string(self._errno)
-
-            self.lib.iperf_reset_test(self._test)
-            data_queue.put(data)
-
-        if self.json_output:
-            data_queue = Queue()
-
-            t = threading.Thread(target=_run_in_thread,
-                                 args=[self, data_queue])
-            t.daemon = True
-
-            t.start()
-            while t.is_alive():
-                t.join(.1)
-
-            return TestResult(data_queue.get())
-        else:
-            # setting json_output to False will output test to screen only
-            self.lib.iperf_run_server(self._test)
-            self.lib.iperf_reset_test(self._test)
-
-            return None
 
 
 class TestResult(object):
@@ -924,3 +867,80 @@ class TestResult(object):
 
 
 iperf = IPerf3('c')
+
+
+
+
+
+
+# class Server(IPerf3):
+    # """An iperf3 server connection.
+
+    # This starts an iperf3 server session. The server terminates after each
+    # succesful client connection so it might be useful to run Server.run()
+    # in a loop.
+
+    # The C function iperf_run_server is called in a seperate thread to make
+    # sure KeyboardInterrupt(aka ctrl+c) can still be captured
+
+    # Basic Usage::
+
+      # >>> import iperf3
+
+      # >>> server = iperf3.Server()
+      # >>> server.run()
+      # {'start': {...
+    # """
+
+    # def __init__(self, *args, **kwargs):
+        # """Initialise the iperf3 server instance"""
+        # super(Server, self).__init__(role='s', *args, **kwargs)
+
+    # def run(self):
+        # """Run the iperf3 server instance.
+
+        # :rtype: instance of :class:`TestResult`
+        # """
+
+        # def _run_in_thread(self, data_queue):
+            # """Runs the iperf_run_server
+
+            # :param data_queue: thread-safe queue
+            # """
+            # output_to_pipe(self._pipe_in)  # disable stdout
+            # error = self.lib.iperf_run_server(self._test)
+            # output_to_screen(self._stdout_fd, self._stderr_fd)  # enable stdout
+
+            # # TODO json_output_string not available on earlier iperf3 builds
+            # # have to build in a version check using self.iperf_version
+            # # The following line should work on later versions:
+            # # data = c_char_p(
+            # #    self.lib.iperf_get_test_json_output_string(self._test)
+            # # ).value
+            # data = read_pipe(self._pipe_out)
+
+            # if not data or error:
+                # data = '{"error": "%s"}' % self._error_to_string(self._errno)
+
+            # self.lib.iperf_reset_test(self._test)
+            # data_queue.put(data)
+
+        # if self.json_output:
+            # data_queue = Queue()
+
+            # t = threading.Thread(target=_run_in_thread,
+                                 # args=[self, data_queue])
+            # t.daemon = True
+
+            # t.start()
+            # while t.is_alive():
+                # t.join(.1)
+
+            # return TestResult(data_queue.get())
+        # else:
+            # # setting json_output to False will output test to screen only
+            # self.lib.iperf_run_server(self._test)
+            # self.lib.iperf_reset_test(self._test)
+
+            # return None
+

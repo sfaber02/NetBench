@@ -38,4 +38,4 @@ dlopen=''
 dlpreopen=''
 
 # Directory that this library needs to be installed in:
-libdir='/Users/shawn/dev/iperf/build/lib'
+libdir='/Users/shawn/dev/netbench/iperf/lib'
