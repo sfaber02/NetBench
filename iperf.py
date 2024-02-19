@@ -67,7 +67,7 @@ def output_to_pipe(pipe_in):
 
     :param pipe_out: The pipe to redirect stdout and stderr to
     """
-    os.dup2(pipe_in, 1)  # stdout
+    os.dup2(pipe_in, 1, inheritable=True)  # stdout
     # os.dup2(pipe_in, 2)  # stderr
 
 
@@ -77,8 +77,8 @@ def output_to_screen(stdout_fd, stderr_fd):
     :param stdout_fd: The stdout file descriptor
     :param stderr_fd: The stderr file descriptor
     """
-    print(f"{stdout_fd}")
-    os.dup2(stdout_fd, 1)
+    # print(f"{stdout_fd}")
+    # os.dup2(stdout_fd, 1)
     # os.dup2(stderr_fd, 2)
 
 
@@ -246,6 +246,7 @@ class IPerf3(object):
         self._stderr_fd = os.dup(2)
         self._pipe_out, self._pipe_in = os.pipe()  # no need for pipe write
 
+
         # Generic test settings
         self.role = role
         self.json_output = True
@@ -394,7 +395,6 @@ class IPerf3(object):
             self.lib.iperf_set_test_json_stream(self._test, 1)
         else:
             self.lib.iperf_set_test_json_stream(self._test, 0)
-        print(f"JSON STREAM FLAG = {enabled}")
         self._json_stream_output = enabled
 
     @property
@@ -575,7 +575,6 @@ class Client(IPerf3):
     def test_reporter_interval(self, interval):
         self.lib.iperf_set_test_reporter_interval(self._test, interval)
         self._test_reporter_interval = interval
-        print(f"Test Reporter Interval = {self._test_reporter_interval}")
 
     @property
     def test_stats_interval(self, interval):
@@ -710,7 +709,7 @@ class Client(IPerf3):
                 if data:
                     data = data.decode('utf-8')
 
-            output_to_screen(self._stdout_fd, self._stderr_fd)  # enable stdout
+            # output_to_screen(self._stdout_fd, self._stderr_fd)  # enable stdout
 
             # if not data or error:
                 # data = '{"error": "%s"}' % self._error_to_string(self._errno)
