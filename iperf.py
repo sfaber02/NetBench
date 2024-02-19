@@ -103,6 +103,7 @@ class IPerf3(object):
         try:
             self.lib = cdll.LoadLibrary(
                 "/Users/shawn/dev/netbench/iperf/lib/libiperf.0.dylib")
+            print("Library Loaded")
         except OSError:
             raise OSError(
                 "Couldn't find shared library {}, is iperf3 installed?".format(
