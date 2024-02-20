@@ -1,6 +1,6 @@
 import subprocess
-# from bokeh.models import ColumnDataSource
-# from bokeh.plotting import curdoc, figure
+from bokeh.models import ColumnDataSource
+from bokeh.plotting import curdoc, figure
 import re
 # from colorama import Fore
 from settings import get_user_inputs, get_settings_from_disk
@@ -16,41 +16,58 @@ import json
 
 class NetBench(Client):
     def __init__(self):
+        # iperf python client base class
         super().__init__()
+        # pipe for json stream test data from iperf
         self.input_data_pipe, self.output_data_pipe = Pipe()
+        # thrad to run test
         self.worker_thread: Thread
+        # store original stdout for later
         self._stdout_fd = os.dup(1)
         self._stderr_fd = os.dup(2)
         # redirect stdout
-        os.dup2(self._pipe_in, 1 , inheritable=True)  # redirect stdout to pipe
-        os.dup2(self._pipe_in, 2)  # stderr 
+        os.dup2(self._pipe_in, 1 , inheritable=True)
+        # os.dup2(self._pipe_in, 2)  # stderr 
 
-        self.output = []
+
+
+        # column data for bokeh
+        self.column_data = ColumnDataSource(dict(x=[], y=[]))
+        self.x_stream = []
+        self.y_stream = []
+        self.plot =  figure(
+            title="title",
+            x_axis_label="WHAT",
+            y_axis_label="Mbits / sec",
+        )
+        self.plot.width = 800 
+        self.plot.height = 600
+        self.plot.line(x="x", y="y", source=self.column_data)
+        self.curdoc = curdoc()
+        self.curdoc.add_root(self.plot)
+ 
 
     def start_test(self):
-        print(f"TEST = {self._test}")
         self.worker_thread = Thread(
             target=self.run)
         self.worker_thread.start()
         self.pipe_reader()
-        # self.worker_thread.join()
-        # redirect pipe_in to stdout for visibility
-        # os.dup2(self._stdout_fd, 1)
-        # os.dup2(stderr_fd, 2) # stdout
+        self.curdoc.add_periodic_callback(self.update_graph, 0.5)
 
-        # print("ENDND")
-        # print(self.output) 
 
     def pipe_reader(self):
         while self.worker_thread.is_alive():
             try:
                 msg = b""
-                # while self.more_data():
                 msg = os.read(self._pipe_out, 1024) 
                 if msg:
                     msg = msg.decode('utf-8')
-                    self.output.append(msg)
-                    self.parse_pipe_data(msg)
+                    data_x, data_y = self.parse_pipe_data(msg)
+                    # self.x_stream.append(data_x) 
+                    # self.y_stream.append(data_y)
+
+                    # self.columnx_data["x"] = data_x
+                    # self.column_data["y"] = data_y
                 else:
                     self.force_print("EMPTY MSG")
             except:
@@ -60,15 +77,34 @@ class NetBench(Client):
         os.close(self._pipe_in)
         os.close(self._pipe_out)
 
+    def update_graph(self):
+        x = [self.x_stream[-1]] if len(self.x_stream) > 0 else []
+        y = [self.y_stream[-1]] if len(self.y_stream) > 0 else []
+        self.column_data.stream(dict(x=x, y=y))
+        
+        # if self.worker_thread.is_alive():
+            # try:
+                # msg = b""
+                # msg = os.read(self._pipe_out, 1024) 
+                # if msg:
+                    # msg = msg.decode('utf-8')
+                    # parsed_data = self.parse_pipe_data(msg)
+                    # data_x, data_y =  source.stream(dict(x=[data_x], y=[data_y]))
+                # else:
+                    # self.force_print("EMPTY MSG")
+            # except:
+                # self.force_print("ERROR")
+
+
 
     def parse_pipe_data(self, data):
         try:
             data_dict = json.loads(data)
         except:
             data_dict = {}
+            return 0, 0
             # self.force_print("bad json")
 
-        
         try:
             data = data_dict.get("data", {})
             packet_sums = data.get("sum", {})
@@ -78,18 +114,11 @@ class NetBench(Client):
                 end_time = packet_sums.get("end", 0.0)
                 print_string = str(end_time)
                 self.force_print(print_string)
+                return end_time, bits_per_second
         except Exception as e:
             self.force_print(f"BAD THING {e}")
+            return 0, 0
 
-
-    def more_data(self):
-        """Check if there is more data left on the pipe
-
-        :param pipe_out: The os pipe_out
-        :rtype: bool
-        """
-        r, _, _ = select.select([self._pipe_out], [], [], 0)
-        return bool(r)
 
     def force_print(self, message):
         message = message + "\n"
@@ -108,9 +137,9 @@ class NetBench(Client):
 
 def main():
     netbench = NetBench()
-    netbench.server_hostname = "192.168.50.98"
+    netbench.server_hostname = "127.0.0.1"
     netbench.port = 5201
-    netbench.duration = 3
+    netbench.duration = 10
     netbench.test_reporter_interval = 0.1
     netbench.test_stats_interval = 0.1 
     netbench.json_output = True 
