@@ -20,8 +20,12 @@ class NetBench(Client):
         super().__init__()
         # pipe for json stream test data from iperf
         self.input_data_pipe, self.output_data_pipe = Pipe()
-        # thrad to run test
+        # thread to run test
         self.worker_thread: Thread
+        # thread to read pipe
+        self.pipe_thread: Thread
+        # thread to plot graph
+        self.graph_thread: Thread
         # store original stdout for later
         self._stdout_fd = os.dup(1)
         self._stderr_fd = os.dup(2)
@@ -48,11 +52,19 @@ class NetBench(Client):
  
 
     def start_test(self):
+        # start iperf test 
         self.worker_thread = Thread(
             target=self.run)
         self.worker_thread.start()
-        self.pipe_reader()
-        self.curdoc.add_periodic_callback(self.update_graph, 0.5)
+
+        # start pipe worker
+        self.pipe_thread = Thread(target=self.pipe_reader)
+        self.pipe_thread.start()
+        # self.pipe_reader()
+        self.graph_thread = Thread(target=self.start_graph)
+        self.graph_thread.start()
+
+        self.force_print("All Threads Started! Commencing Test")
 
 
     def pipe_reader(self):
@@ -63,8 +75,8 @@ class NetBench(Client):
                 if msg:
                     msg = msg.decode('utf-8')
                     data_x, data_y = self.parse_pipe_data(msg)
-                    # self.x_stream.append(data_x) 
-                    # self.y_stream.append(data_y)
+                    self.x_stream.append(data_x) 
+                    self.y_stream.append(data_y)
 
                     # self.columnx_data["x"] = data_x
                     # self.column_data["y"] = data_y
@@ -81,21 +93,9 @@ class NetBench(Client):
         x = [self.x_stream[-1]] if len(self.x_stream) > 0 else []
         y = [self.y_stream[-1]] if len(self.y_stream) > 0 else []
         self.column_data.stream(dict(x=x, y=y))
-        
-        # if self.worker_thread.is_alive():
-            # try:
-                # msg = b""
-                # msg = os.read(self._pipe_out, 1024) 
-                # if msg:
-                    # msg = msg.decode('utf-8')
-                    # parsed_data = self.parse_pipe_data(msg)
-                    # data_x, data_y =  source.stream(dict(x=[data_x], y=[data_y]))
-                # else:
-                    # self.force_print("EMPTY MSG")
-            # except:
-                # self.force_print("ERROR")
 
-
+    def start_graph(self):
+        self.curdoc.add_periodic_callback(self.update_graph, 0.2)
 
     def parse_pipe_data(self, data):
         try:
@@ -118,7 +118,6 @@ class NetBench(Client):
         except Exception as e:
             self.force_print(f"BAD THING {e}")
             return 0, 0
-
 
     def force_print(self, message):
         message = message + "\n"
