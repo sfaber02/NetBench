@@ -26,6 +26,7 @@ import select
 import json
 import threading
 from socket import SOCK_DGRAM, SOCK_STREAM
+from multiprocessing import Process, Pipe 
 
 try:
     from queue import Queue
@@ -68,11 +69,17 @@ def output_to_pipe(pipe_in):
     :param pipe_out: The pipe to redirect stdout and stderr to
     """
     os.dup2(pipe_in, 1, inheritable=True)  # stdout
+    os.dup2(pipe_in, 2)  # stderr
+
+
+def output_to_data_pipe(pipe_in):
+    # os.dup2(pipe_in, 1, inheritable=True)  # stdout
     # os.dup2(pipe_in, 2)  # stderr
+    pass
 
 
 def output_to_screen(stdout_fd, stderr_fd):
-    """Redirects stdout and stderr to a pipe
+    """Redirects stdout and stderr to a the screen
 
     :param stdout_fd: The stdout file descriptor
     :param stderr_fd: The stderr file descriptor
@@ -150,6 +157,7 @@ class IPerf3(object):
         
         self.lib.iperf_set_test_json_stream.argtypes = (c_void_p, c_int);
         self.lib.iperf_set_test_json_stream.restype= None; 
+
         self.lib.iperf_get_verbose.restype = c_int
         self.lib.iperf_get_verbose.argtypes = (c_void_p, )
         self.lib.iperf_set_verbose.restype = None
@@ -245,7 +253,6 @@ class IPerf3(object):
         self._stdout_fd = os.dup(1)
         self._stderr_fd = os.dup(2)
         self._pipe_out, self._pipe_in = os.pipe()  # no need for pipe write
-
 
         # Generic test settings
         self.role = role
@@ -695,14 +702,16 @@ class Client(IPerf3):
         :rtype: instance of :class:`TestResult`
         """
         if self.json_output:
-            # output_to_pipe(self._pipe_in)  # Disable stdout
+            # output_to_data_pipe(self._pipe_in)  # Disable stdout
             error = self.lib.iperf_run_client(self._test)
 
             if not self.iperf_version.startswith('iperf 3.1'):
+                print("READ PIPE")
                 data = read_pipe(self._pipe_out)
                 if data.startswith('Control connection'):
                     data = '{' + data.split('{', 1)[1]
             else:
+                print("NO READ PIPE")
                 data = c_char_p(
                     self.lib.iperf_get_test_json_output_string(
                         self._test)).value
@@ -713,8 +722,8 @@ class Client(IPerf3):
 
             # if not data or error:
                 # data = '{"error": "%s"}' % self._error_to_string(self._errno)
-
-            return TestResult(data)
+            # print(TestResult(data))
+            # return TestResult(data)
 
 
 
