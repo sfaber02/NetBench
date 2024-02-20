@@ -38,14 +38,14 @@ __version__ = '0.1.11'
 MAX_UDP_BULKSIZE = (65535 - 8 - 20)
 
 
-def more_data(pipe_out):
-    """Check if there is more data left on the pipe
+# def more_data(pipe_out):
+    # """Check if there is more data left on the pipe
 
-    :param pipe_out: The os pipe_out
-    :rtype: bool
-    """
-    r, _, _ = select.select([pipe_out], [], [], 0)
-    return bool(r)
+    # :param pipe_out: The os pipe_out
+    # :rtype: bool
+    # """
+    # r, _, _ = select.select([pipe_out], [], [], 0)
+    # return bool(r)
 
 
 def read_pipe(pipe_out):
@@ -701,29 +701,29 @@ class Client(IPerf3):
 
         :rtype: instance of :class:`TestResult`
         """
-        if self.json_output:
-            # output_to_data_pipe(self._pipe_in)  # Disable stdout
-            error = self.lib.iperf_run_client(self._test)
 
-            if not self.iperf_version.startswith('iperf 3.1'):
-                print("READ PIPE")
-                data = read_pipe(self._pipe_out)
-                if data.startswith('Control connection'):
-                    data = '{' + data.split('{', 1)[1]
-            else:
-                print("NO READ PIPE")
-                data = c_char_p(
-                    self.lib.iperf_get_test_json_output_string(
-                        self._test)).value
-                if data:
-                    data = data.decode('utf-8')
+        # output_to_data_pipe(self._pipe_in)  # Disable stdout
+        self.lib.iperf_run_client(self._test)
 
-            # output_to_screen(self._stdout_fd, self._stderr_fd)  # enable stdout
+        # if not self.iperf_version.startswith('iperf 3.1'):
+            # print("READ PIPE")
+            # data = read_pipe(self._pipe_out)
+            # if data.startswith('Control connection'):
+                # data = '{' + data.split('{', 1)[1]
+        # else:
+            # print("NO READ PIPE")
+            # data = c_char_p(
+                # self.lib.iperf_get_test_json_output_string(
+                    # self._test)).value
+            # if data:
+                # data = data.decode('utf-8')
 
-            # if not data or error:
-                # data = '{"error": "%s"}' % self._error_to_string(self._errno)
-            # print(TestResult(data))
-            # return TestResult(data)
+        # output_to_screen(self._stdout_fd, self._stderr_fd)  # enable stdout
+
+        # if not data or error:
+            # data = '{"error": "%s"}' % self._error_to_string(self._errno)
+        # print(TestResult(data))
+        # return TestResult(data)
 
 
 
