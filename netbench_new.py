@@ -12,6 +12,8 @@ from multiprocessing import Pipe
 import os
 import select
 import json
+from collections import deque
+import time
 
 
 class NetBench(Client):
@@ -37,8 +39,7 @@ class NetBench(Client):
 
         # column data for bokeh
         self.column_data = ColumnDataSource(dict(x=[], y=[]))
-        self.x_stream = []
-        self.y_stream = []
+        self.plot_queue = deque()
         self.plot =  figure(
             title="title",
             x_axis_label="WHAT",
@@ -60,7 +61,7 @@ class NetBench(Client):
         # start pipe worker
         self.pipe_thread = Thread(target=self.pipe_reader)
         self.pipe_thread.start()
-        # self.pipe_reader()
+        # self.graph_reader()
         self.graph_thread = Thread(target=self.start_graph)
         self.graph_thread.start()
 
@@ -74,12 +75,9 @@ class NetBench(Client):
                 msg = os.read(self._pipe_out, 1024) 
                 if msg:
                     msg = msg.decode('utf-8')
-                    data_x, data_y = self.parse_pipe_data(msg)
-                    self.x_stream.append(data_x) 
-                    self.y_stream.append(data_y)
-                    self.force_print(f"stream array len = {len(self.x_stream)}")
-                    # self.columnx_data["x"] = data_x
-                    # self.column_data["y"] = data_y
+                    data_tuple = self.parse_pipe_data(msg)
+                    if data_tuple: self.plot_queue.append(data_tuple)               
+                    # self.force_print(f"queue len = {len(self.plot_queue)}")
                 else:
                     self.force_print("EMPTY MSG")
             except:
@@ -90,9 +88,12 @@ class NetBench(Client):
         os.close(self._pipe_out)
 
     def update_graph(self):
-        x = [self.x_stream.pop()] if len(self.x_stream) > 0 else []
-        y = [self.y_stream.pop()] if len(self.y_stream) > 0 else []
-        self.column_data.stream(dict(x=x, y=y))
+        try:
+            x, y = self.plot_queue.popleft()
+            self.force_print(f"x = {x} y = {y}")
+            self.column_data.stream(dict(x=[x], y=[y]))
+        except IndexError as e:
+            pass
 
     def start_graph(self):
         self.curdoc.add_periodic_callback(self.update_graph, 0.2)
@@ -102,22 +103,19 @@ class NetBench(Client):
             data_dict = json.loads(data)
         except:
             data_dict = {}
-            return 0, 0
-            # self.force_print("bad json")
+            return None             # self.force_print("bad json")
 
         try:
             data = data_dict.get("data", {})
             packet_sums = data.get("sum", {})
-            # packet_info = streams[0] if len(streams) > 0 else {}
             if packet_sums:
                 bits_per_second = packet_sums.get("bits_per_second", 0.0)
                 end_time = packet_sums.get("end", 0.0)
-                print_string = str(end_time)
-                self.force_print(print_string)
-                return end_time, bits_per_second
-        except Exception as e:
+
+                return (end_time, bits_per_second)
+        except (KeyError, IndexError) as e:
             self.force_print(f"BAD THING {e}")
-            return 0, 0
+            return None
 
     def force_print(self, message):
         message = message + "\n"
@@ -128,7 +126,6 @@ class NetBench(Client):
             msg_type = type(data_dict).__name__ if type(data_dict) else ""
             self.force_print(f"{msg_type}\n")                    
         except Exception as e:
-            # print(f"Buttes {e}")
             pass
 
 
@@ -143,6 +140,7 @@ def main():
     netbench.test_stats_interval = 0.1 
     netbench.json_output = True 
     netbench.json_stream_output = 1
+    # netbench.omit = 9
 
     netbench.start_test()
     # print(result)
