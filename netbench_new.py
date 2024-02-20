@@ -77,7 +77,7 @@ class NetBench(Client):
                     data_x, data_y = self.parse_pipe_data(msg)
                     self.x_stream.append(data_x) 
                     self.y_stream.append(data_y)
-
+                    self.force_print(f"stream array len = {len(self.x_stream)}")
                     # self.columnx_data["x"] = data_x
                     # self.column_data["y"] = data_y
                 else:
@@ -90,8 +90,8 @@ class NetBench(Client):
         os.close(self._pipe_out)
 
     def update_graph(self):
-        x = [self.x_stream[-1]] if len(self.x_stream) > 0 else []
-        y = [self.y_stream[-1]] if len(self.y_stream) > 0 else []
+        x = [self.x_stream.pop()] if len(self.x_stream) > 0 else []
+        y = [self.y_stream.pop()] if len(self.y_stream) > 0 else []
         self.column_data.stream(dict(x=x, y=y))
 
     def start_graph(self):
