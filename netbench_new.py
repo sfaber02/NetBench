@@ -61,11 +61,10 @@ class NetBench(Client):
         self.force_print(f"WORKER THREAD ALIVE? {self.worker_thread.is_alive()}") 
         self.force_print(f"MORE DATA? {self.more_data()}")
         while self.worker_thread.is_alive():
-            self.force_print("LOOP")
             try:
                 msg = b""
-                while self.more_data():
-                    msg += os.read(self._pipe_out, 1024) 
+                # while self.more_data():
+                msg = os.read(self._pipe_out, 1024) 
                 msg = msg.decode('utf-8')
                 self.output.append(msg)
                 self.force_print(f"Line = {msg})")
