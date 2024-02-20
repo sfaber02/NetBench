@@ -57,7 +57,9 @@ class NetBench(Client):
                 self.force_print("ERROR")
                 break
         self.force_print("LOOP DEAD")
-        self.input_data_pipe.close() 
+        os.close(self._pipe_in)
+        os.close(self._pipe_out)
+
 
     def parse_pipe_data(self, data):
         try:
@@ -73,7 +75,8 @@ class NetBench(Client):
             # packet_info = streams[0] if len(streams) > 0 else {}
             if packet_sums:
                 bits_per_second = packet_sums.get("bits_per_second", 0.0)
-                print_string = str(bits_per_second)
+                end_time = packet_sums.get("end", 0.0)
+                print_string = str(end_time)
                 self.force_print(print_string)
         except Exception as e:
             self.force_print(f"BAD THING {e}")
