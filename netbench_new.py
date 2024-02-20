@@ -67,7 +67,7 @@ class NetBench(Client):
                 msg = os.read(self._pipe_out, 1024) 
                 msg = msg.decode('utf-8')
                 self.output.append(msg)
-                self.force_print(f"Line = {msg})")
+                self.force_print(f"{msg}")
             except:
                 self.force_print("ERROR")
                 break
