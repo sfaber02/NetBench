@@ -5,70 +5,110 @@ import re
 from colorama import Fore
 from settings import get_user_inputs, get_settings_from_disk
 from datetime import datetime
+from iperf import Client
+import threading
+import sys
+import json
 
 # store subprocess
 process = None
+worker_thread = None
 # Create column data source for plot
 source = ColumnDataSource(dict(x=[], y=[]))
 # store settings
 settings = get_settings_from_disk()
+iperf_client: Client
 
+# Redirect stdout to our own stream.
+class MyStream:
+    def write(self, text):
+        # This is where we can parse the output and do what we need with it.
+        # print(f"Intercepted text: {text}", end="")
+        # print(f"Intercepted text: {text}", end="", flush=True)
+        message = "BUTTES"
+        sys.__stdout__.write(message)
+        # num_bytes = float(text["data"]["streams"]["bytes"], 0.0)
+        # sys.__stdout__.write(f"djdsklfjdskf {num_bytes}")
+        # dict(x=[data_x], y=[data_y])
+    def flush(self):
+        # Redirect to the original standard output
+        return sys.__stdout__.flush()
+
+sys.stdout = MyStream()
 
 def start():
     global settings
+    global iperf_client
 
-    change_user_inputs = input("Change Test Settings? (Y or N)")
-    if change_user_inputs == "y" or change_user_inputs == "Y":
-        settings = get_user_inputs()
+    # change_user_inputs = input("Change Test Settings? (Y or N)")
+    # if change_user_inputs == "y" or change_user_inputs == "Y":
+        # settings = get_user_inputs()
 
-    print(f"\033[32mTesting on host {settings['Host']}, port {settings['Port']}")
+    # print(f"\033[32mTesting on host {settings['Host']}, port {settings['Port']}")
 
-    #get current timestamp
-    current_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    # #get current timestamp
+    # current_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    #combine timestamp with title
-    title_with_timestamp = f"{settings['Title']} - {current_timestamp}"
-
+    # #combine timestamp with title
+    # title_with_timestamp = f"{settings['Title']} - {current_timestamp}"
+    iperf_client = Client()
+    iperf_client.server_hostname = "192.168.50.98"
+    iperf_client.port = 5201
+    iperf_client.duration = 60
+    iperf_client.test_reporter_interval = 0.1
+    
+    iperf_client.test_stats_interval = 0.1 
+    # print(iperf_client)
+    iperf_client.json_output = True 
+    iperf_client.json_stream_output = 1
+    
     # Create plot
-    plot = figure(
-        title=title_with_timestamp,
-        x_axis_label=settings["X Axis Label"],
-        y_axis_label="Mbits / sec",
-    )
-    plot.width = int(settings["Width"])
-    plot.height = int(settings["Height"])
-    plot.line(x="x", y="y", source=source, line_color=settings["Line Color"])
+    # plot = figure(
+        # title=title_with_timestamp,
+        # title="YAY",
+        # x_axis_label=settings["X Axis Label"],
+        # y_axis_label="Mbits / sec",
+    # )
+    # plot.width = int(settings["Width"])
+    # plot.height = int(settings["Height"])
+    # plot.line(x="x", y="y", source=source, line_color=settings["Line Color"])
 
-    curdoc().theme = settings["Theme"]
-    curdoc().add_root(plot)
-    curdoc().add_periodic_callback(update, 0.5)
+    # curdoc().theme = settings["Theme"]
+    # curdoc().add_root(plot)
+    # curdoc().add_periodic_callback(update, 0.5)
+
+    update()
 
 
 def update():
     global settings
     global process
     global source
+    global worker_thread
+    global iperf_client
     try:
-        if process is None:
-            command = [
-                "iperf3",
-                "-c",
-                settings["Host"],
-                "-p",
-                settings["Port"],
-                "-i",
-                settings["Interval"],
-                "-t",
-                settings["Test Length"],
-                "-f",
-                "m",
-                "--forceflush",
-            ]
-            process = subprocess.Popen(command, stdout=subprocess.PIPE)
-        line = process.stdout.readline().decode().strip()
+        if worker_thread is None:
+            # command = [
+                # "iperf3",
+                # "-c",
+                # settings["Host"],
+                # "-p",
+                # settings["Port"],
+                # "-i",
+                # settings["Interval"],
+                # "-t",
+                # settings["Test Length"],
+                # "-f",
+                # "m",
+                # "--forceflush",
+            # ]
+            # process = subprocess.Popen(command, stdout=subprocess.PIPE)
+            worker_thread = threading.Thread(target=iperf_client.run())
+            worker_thread.start()
+        # line = process.stdout.readline().decode().strip()
         # parse data here
-        data_x, data_y = parse_line(line)
-        source.stream(dict(x=[data_x], y=[data_y]))
+        # data_x, data_y = parse_line(line)
+        # source.stream()
     except ParseException as e:
         print(f"\033[31m{e.message}, line = {e.line}")
         print(Fore.GREEN)
