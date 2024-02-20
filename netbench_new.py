@@ -9,6 +9,7 @@ from iperf import Client, TestResult
 from threading import Thread
 import sys
 from multiprocessing import Pipe
+import os
 
 # Redirect stdout to our own stream.
 class MyStream:
@@ -32,15 +33,37 @@ class NetBench(Client):
         super().__init__()
         self.input_data_pipe, self.output_data_pipe = Pipe()
         self.worker_thread: Thread
+        self._stdout_fd = os.dup(1)
+        self._stderr_fd = os.dup(2)
+        # redirect stdout
+        # os.dup2(self._pipe_in, 1 , inheritable=True)  # redirect stdout to pipe
+        # os.dup2(self._pipe_in, 2)  # stderr 
+
+        self.output = []
 
     def start_test(self):
         self.worker_thread = Thread(
-            target=self.run()) # args=(self.input_data_pipe,))
+            target=self.run(), args=(self.input_data_pipe,))
         self.worker_thread.start()
+        self.pipe_reader()
+        self.worker_thread.join()
+        self.input_date_pipe.close() 
+        # redirect pipe_in to stdout for visibility
+        # os.dup2(stdout_fd, 1)
+        # os.dup2(stderr_fd, 2) # stdout
 
-        # self.worker_thread.join()
-        
-        # print(self.output_data_pipe.recv())
+        print("ENDND")
+        print(self.output) 
+
+    def pipe_reader(self):
+        while True:
+            try:
+                msg = self.output_data_pipe.recv() 
+                self.output.append(msg)
+                # print(f"Line = {msg})")
+            except:
+                print("ERROR")
+                break
 
 def main():
     netbench = NetBench()
