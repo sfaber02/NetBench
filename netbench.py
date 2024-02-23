@@ -63,12 +63,12 @@ def start():
     iperf_client.json_stream_output = 1
     
     # Create plot
-    # plot = figure(
-        # title=title_with_timestamp,
-        # title="YAY",
-        # x_axis_label=settings["X Axis Label"],
-        # y_axis_label="Mbits / sec",
-    # )
+    plot = figure(
+        title=title_with_timestamp,
+        title="YAY",
+        x_axis_label=settings["X Axis Label"],
+        y_axis_label="Mbits / sec",
+    )
     # plot.width = int(settings["Width"])
     # plot.height = int(settings["Height"])
     # plot.line(x="x", y="y", source=source, line_color=settings["Line Color"])
@@ -108,7 +108,7 @@ def update():
         # line = process.stdout.readline().decode().strip()
         # parse data here
         # data_x, data_y = parse_line(line)
-        # source.stream()
+        # source.stream(dict(x=[data_x], y=[data_y]))
     except ParseException as e:
         print(f"\033[31m{e.message}, line = {e.line}")
         print(Fore.GREEN)
