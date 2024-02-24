@@ -2,7 +2,6 @@ from bokeh.models import ColumnDataSource
 from bokeh.plotting import curdoc, figure
 
 # from colorama import Fore
-from datetime import datetime
 from iperf import Client
 from settings import Settings
 from threading import Thread
@@ -83,13 +82,16 @@ class NetBench(Client):
                     data_tuple: Tuple[float, float] = self.parse_pipe_data(msg)
                     if data_tuple:
                         self.plot_queue.append(data_tuple)
-                    # self.force_print(f"queue len = {len(self.plot_queue)}")
+                    # self.force_print(msg)
                 else:
                     self.force_print("EMPTY MSG")
             except Exception:
                 self.force_print("ERROR")
                 break
+            # slow down worker loop 50ms
+            time.sleep(0.05)
         self.force_print("LOOP DEAD")
+        self.curdoc.remove_periodic_callback(self.graph_callback)
         os.close(self._pipe_in)
         os.close(self._pipe_out)
 
@@ -101,7 +103,7 @@ class NetBench(Client):
             pass
 
     def start_graph(self):
-        self.curdoc.add_periodic_callback(self.update_graph, 0.2)
+        self.graph_callback = self.curdoc.add_periodic_callback(self.update_graph, 0.2)
 
     def parse_pipe_data(self, data):
         try:
@@ -124,10 +126,3 @@ class NetBench(Client):
     def force_print(self, message):
         message = message + "\n"
         os.write(self._stdout_fd, message.encode())
-
-    # def get_type_string(self, input):
-        # try:
-            # msg_type = type(data_dict).__name__ if type(data_dict) else ""
-            # self.force_print(f"{msg_type}\n")
-        # except Exception as e:
-            # pass
