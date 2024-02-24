@@ -4,7 +4,6 @@ from bokeh.plotting import curdoc, figure
 import re
 from colorama import Fore
 from settings import get_user_inputs, get_settings_from_disk
-from datetime import datetime
 from iperf import Client
 import threading
 import sys
@@ -47,10 +46,8 @@ def start():
     # print(f"\033[32mTesting on host {settings['Host']}, port {settings['Port']}")
 
     # #get current timestamp
-    # current_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     # #combine timestamp with title
-    # title_with_timestamp = f"{settings['Title']} - {current_timestamp}"
     iperf_client = Client()
     iperf_client.server_hostname = "192.168.50.98"
     iperf_client.port = 5201
@@ -69,13 +66,6 @@ def start():
         x_axis_label=settings["X Axis Label"],
         y_axis_label="Mbits / sec",
     )
-    # plot.width = int(settings["Width"])
-    # plot.height = int(settings["Height"])
-    # plot.line(x="x", y="y", source=source, line_color=settings["Line Color"])
-
-    # curdoc().theme = settings["Theme"]
-    # curdoc().add_root(plot)
-    # curdoc().add_periodic_callback(update, 0.5)
 
     update()
 

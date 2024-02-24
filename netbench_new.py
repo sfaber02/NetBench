@@ -3,9 +3,9 @@ from bokeh.models import ColumnDataSource
 from bokeh.plotting import curdoc, figure
 import re
 # from colorama import Fore
-from settings import get_user_inputs, get_settings_from_disk
 from datetime import datetime
 from iperf import Client, TestResult
+from settings import Settings
 from threading import Thread
 import sys
 from multiprocessing import Pipe
@@ -114,7 +114,6 @@ class NetBench(Client):
 
                 return (end_time, bits_per_second)
         except (KeyError, IndexError) as e:
-            self.force_print(f"BAD THING {e}")
             return None
 
     def force_print(self, message):
@@ -128,28 +127,3 @@ class NetBench(Client):
         except Exception as e:
             pass
 
-
-
-
-def main():
-    netbench = NetBench()
-    netbench.server_hostname = "127.0.0.1"
-    netbench.port = 5201
-    netbench.duration = 10
-    netbench.test_reporter_interval = 0.1
-    netbench.test_stats_interval = 0.1 
-    netbench.json_output = True 
-    netbench.json_stream_output = 1
-    # netbench.omit = 9
-
-    netbench.start_test()
-    # print(result)
-
-
-
-
-
-
-
-
-main()
