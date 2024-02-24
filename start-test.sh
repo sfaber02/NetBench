@@ -1,3 +1,3 @@
 #!/bin/bash
 
-bokeh serve --show netbench_new.py
+bokeh serve --show main.py
