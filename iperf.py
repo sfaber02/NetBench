@@ -26,7 +26,7 @@ import select
 import json
 import threading
 from socket import SOCK_DGRAM, SOCK_STREAM
-from multiprocessing import Process, Pipe 
+from multiprocessing import Process, Pipe
 
 try:
     from queue import Queue
@@ -153,10 +153,10 @@ class IPerf3(object):
             c_void_p,
             c_int,
         )
-       
-        
+
+
         self.lib.iperf_set_test_json_stream.argtypes = (c_void_p, c_int);
-        self.lib.iperf_set_test_json_stream.restype= None; 
+        self.lib.iperf_set_test_json_stream.restype= None;
 
         self.lib.iperf_get_verbose.restype = c_int
         self.lib.iperf_get_verbose.argtypes = (c_void_p, )
@@ -574,7 +574,7 @@ class Client(IPerf3):
     @property
     def test_reporter_interval(self, interval):
         """Change frequency of test packet"""
-        pass                      
+        pass
         # self._test_reporter_interval = self.lib.iperf_get_test_interval(self._test)
         # return self._interval
 
@@ -586,7 +586,7 @@ class Client(IPerf3):
     @property
     def test_stats_interval(self, interval):
         """Change frequency of test packet"""
-        pass                      
+        pass
         # self._test_reporter_interval = self.lib.iperf_get_test_interval(self._test)
         # return self._interval
 
@@ -981,4 +981,3 @@ iperf = IPerf3('c')
             # self.lib.iperf_reset_test(self._test)
 
             # return None
-
