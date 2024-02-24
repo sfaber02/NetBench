@@ -2,6 +2,7 @@ import subprocess
 from bokeh.models import ColumnDataSource
 from bokeh.plotting import curdoc, figure
 import re
+
 # from colorama import Fore
 from datetime import datetime
 from iperf import Client, TestResult
@@ -17,11 +18,18 @@ import time
 
 
 class NetBench(Client):
-    def __init__(self):
+    def __init__(self, settings):
         # iperf python client base class
         super().__init__()
         # pipe for json stream test data from iperf
-        self.input_data_pipe, self.output_data_pipe = Pipe()
+
+
+
+
+
+
+
+self.input_data_pipe, self.output_data_pipe = Pipe()
         # thread to run test
         self.worker_thread: Thread
         # thread to read pipe
@@ -29,33 +37,31 @@ class NetBench(Client):
         # thread to plot graph
         self.graph_thread: Thread
         # store original stdout for later
-        self._stdout_fd = os.dup(1)
+        self._stdout_fd = os.dup(
+            1)
         self._stderr_fd = os.dup(2)
         # redirect stdout
-        os.dup2(self._pipe_in, 1 , inheritable=True)
-        # os.dup2(self._pipe_in, 2)  # stderr 
-
-
+        os.dup2(self._pipe_in, 1, inheritable=True)
+        # os.dup2(self._pipe_in, 2)  # stderr
 
         # column data for bokeh
-        self.column_data = ColumnDataSource(dict(x=[], y=[]))
+        self.column_data = ColumnDataSource(
+            dict(x=[], y=[]))
         self.plot_queue = deque()
-        self.plot =  figure(
-            title="title",
-            x_axis_label="WHAT",
+        self.plot = figure(
+            title=settings["Title"],
+            x_axis_label=settings["X Axis Label"],
             y_axis_label="Mbits / sec",
         )
-        self.plot.width = 800 
+        self.plot.width = 800
         self.plot.height = 600
         self.plot.line(x="x", y="y", source=self.column_data)
         self.curdoc = curdoc()
         self.curdoc.add_root(self.plot)
- 
 
     def start_test(self):
-        # start iperf test 
-        self.worker_thread = Thread(
-            target=self.run)
+        # start iperf test
+        self.worker_thread = Thread(target=self.run)
         self.worker_thread.start()
 
         # start pipe worker
@@ -67,16 +73,16 @@ class NetBench(Client):
 
         self.force_print("All Threads Started! Commencing Test")
 
-
     def pipe_reader(self):
         while self.worker_thread.is_alive():
             try:
                 msg = b""
-                msg = os.read(self._pipe_out, 1024) 
+                msg = os.read(self._pipe_out, 1024)
                 if msg:
-                    msg = msg.decode('utf-8')
+                    msg = msg.decode("utf-8")
                     data_tuple = self.parse_pipe_data(msg)
-                    if data_tuple: self.plot_queue.append(data_tuple)               
+                    if data_tuple:
+                        self.plot_queue.append(data_tuple)
                     # self.force_print(f"queue len = {len(self.plot_queue)}")
                 else:
                     self.force_print("EMPTY MSG")
@@ -103,7 +109,7 @@ class NetBench(Client):
             data_dict = json.loads(data)
         except:
             data_dict = {}
-            return None             # self.force_print("bad json")
+            return None  # self.force_print("bad json")
 
         try:
             data = data_dict.get("data", {})
@@ -123,7 +129,6 @@ class NetBench(Client):
     def get_type_string(self, input):
         try:
             msg_type = type(data_dict).__name__ if type(data_dict) else ""
-            self.force_print(f"{msg_type}\n")                    
+            self.force_print(f"{msg_type}\n")
         except Exception as e:
             pass
-
