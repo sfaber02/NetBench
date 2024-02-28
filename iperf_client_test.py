@@ -7,10 +7,14 @@ class MyStream:
         # This is where we can parse the output and do what we need with it.
         intercepted_text = f"Intercepted text: {text}"
         sys.__stdout__.write(intercepted_text)
+
     def flush(self):
         # Redirect to the original standard output
         return sys.__stdout__.flush()
+
+
 sys.stdout = MyStream()
+
 
 def main():
     iperf_client = Client()
@@ -24,8 +28,8 @@ def main():
     iperf_client.json_output = True
     iperf_client.json_stream_output = 1
 
-
     result = iperf_client.run()
     print(result)
+
 
 main()

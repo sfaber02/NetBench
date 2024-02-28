@@ -1,5 +1,7 @@
 from bokeh.models import ColumnDataSource
 from bokeh.plotting import curdoc, figure
+from bokeh.server.server import Server
+from bokeh.application import Application
 
 # from colorama import Fore
 from iperf import Client
@@ -10,7 +12,7 @@ import os
 import json
 from collections import deque
 import time
-from typing import (Union, Tuple, Dict)
+from typing import Union, Tuple, Dict
 
 
 class NetBench(Client):
@@ -36,16 +38,14 @@ class NetBench(Client):
         # thread to plot graph
         self.graph_thread: Thread
         # store original stdout for later
-        self._stdout_fd = os.dup(
-            1)
+        self._stdout_fd = os.dup(1)
         self._stderr_fd = os.dup(2)
         # redirect stdout
         os.dup2(self._pipe_in, 1, inheritable=True)
         # os.dup2(self._pipe_in, 2)  # stderr
 
         # column data for bokeh
-        self.column_data = ColumnDataSource(
-            dict(x=[], y=[]))
+        self.column_data = ColumnDataSource(dict(x=[], y=[]))
         self.plot_queue: deque = deque()
         self.plot = figure(
             title=self.settings["Title"],
@@ -71,6 +71,9 @@ class NetBench(Client):
         self.graph_thread.start()
 
         self.force_print("All Threads Started! Commencing Test")
+
+    def init_bokeh_server(self):
+        pass
 
     def pipe_reader(self) -> None:
         while self.worker_thread.is_alive():
