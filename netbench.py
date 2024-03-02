@@ -1,138 +1,131 @@
-import subprocess
 from bokeh.models import ColumnDataSource
 from bokeh.plotting import curdoc, figure
-import re
-from colorama import Fore
-from settings import get_user_inputs, get_settings_from_disk
+from bokeh.server.server import Server
+from bokeh.application import Application
+
+# from colorama import Fore
 from iperf import Client
-import threading
-import sys
+from settings import Settings
+from threading import Thread
+from multiprocessing import Pipe
+import os
 import json
-
-# store subprocess
-process = None
-worker_thread = None
-# Create column data source for plot
-source = ColumnDataSource(dict(x=[], y=[]))
-# store settings
-settings = get_settings_from_disk()
-iperf_client: Client
+from collections import deque
+import time
+from typing import Union, Tuple, Dict
 
 
-# Redirect stdout to our own stream.
-class MyStream:
-    def write(self, text):
-        # This is where we can parse the output and do what we need with it.
-        # print(f"Intercepted text: {text}", end="")
-        # print(f"Intercepted text: {text}", end="", flush=True)
-        message = "BUTTES"
-        sys.__stdout__.write(message)
-        # num_bytes = float(text["data"]["streams"]["bytes"], 0.0)
-        # sys.__stdout__.write(f"djdsklfjdskf {num_bytes}")
-        # dict(x=[data_x], y=[data_y])
+class NetBench(Client):
+    def __init__(self):
+        # iperf python client base class
+        super().__init__()
+        self.settings = Settings().settings
 
-    def flush(self):
-        # Redirect to the original standard output
-        return sys.__stdout__.flush()
+        self.server_hostname = self.settings["Host"]
+        self.port = self.settings["Port"]
+        self.duration = int(self.settings["Test Length"])
+        self.test_reporter_interval = float(self.settings["Interval"])
+        self.test_stats_interval = float(self.settings["Interval"])
+        self.json_output = True
+        self.json_stream_output = 1
 
+        # pipe for json stream test data from iperf
+        self.input_data_pipe, self.output_data_pipe = Pipe()
+        # thread to run test
+        self.worker_thread: Thread
+        # thread to read pipe
+        self.pipe_thread: Thread
+        # thread to plot graph
+        self.graph_thread: Thread
+        # store original stdout for later
+        self._stdout_fd = os.dup(1)
+        self._stderr_fd = os.dup(2)
+        # redirect stdout
+        os.dup2(self._pipe_in, 1, inheritable=True)
+        # os.dup2(self._pipe_in, 2)  # stderr
 
-sys.stdout = MyStream()
+        # column data for bokeh
+        self.column_data = ColumnDataSource(dict(x=[], y=[]))
+        self.plot_queue: deque = deque()
+        self.plot = figure(
+            title=self.settings["Title"],
+            x_axis_label=self.settings["X Axis Label"],
+            y_axis_label="Mbits / sec",
+        )
+        self.plot.width = int(self.settings["Width"])
+        self.plot.height = int(self.settings["Height"])
+        self.plot.line(x="x", y="y", source=self.column_data)
+        self.curdoc = curdoc()
+        self.curdoc.theme = self.settings["Theme"]
+        self.curdoc.add_root(self.plot)
 
+    def start_test(self) -> None:
+        # start iperf test
+        self.worker_thread = Thread(target=self.run)
+        self.worker_thread.start()
+        # start pipe worker
+        self.pipe_thread = Thread(target=self.pipe_reader)
+        self.pipe_thread.start()
+        # self.graph_reader()
+        self.graph_thread = Thread(target=self.start_graph)
+        self.graph_thread.start()
 
-def start():
-    global settings
-    global iperf_client
+        self.force_print("All Threads Started! Commencing Test")
 
-    # change_user_inputs = input("Change Test Settings? (Y or N)")
-    # if change_user_inputs == "y" or change_user_inputs == "Y":
-    # settings = get_user_inputs()
+    def init_bokeh_server(self):
+        pass
 
-    # print(f"\033[32mTesting on host {settings['Host']}, port {settings['Port']}")
+    def pipe_reader(self) -> None:
+        while self.worker_thread.is_alive():
+            try:
+                msg: Union[str, bytes] = b""
+                msg = os.read(self._pipe_out, 1024)
+                if msg:
+                    msg = msg.decode("utf-8")
+                    data_tuple: Tuple[float, float] = self.parse_pipe_data(msg)
+                    if data_tuple:
+                        self.plot_queue.append(data_tuple)
+                    # self.force_print(msg)
+                else:
+                    self.force_print("EMPTY MSG")
+            except Exception:
+                self.force_print("ERROR")
+                break
+            # slow down worker loop 50ms
+            time.sleep(0.05)
+        self.force_print("LOOP DEAD")
+        self.curdoc.remove_periodic_callback(self.graph_callback)
+        os.close(self._pipe_in)
+        os.close(self._pipe_out)
 
-    # #get current timestamp
+    def update_graph(self):
+        try:
+            x, y = self.plot_queue.popleft()
+            self.column_data.stream(dict(x=[x], y=[y]))
+        except IndexError:
+            pass
 
-    # #combine timestamp with title
-    iperf_client = Client()
-    iperf_client.server_hostname = "192.168.50.98"
-    iperf_client.port = 5201
-    iperf_client.duration = 60
-    iperf_client.test_reporter_interval = 0.1
+    def start_graph(self):
+        self.graph_callback = self.curdoc.add_periodic_callback(self.update_graph, 0.2)
 
-    iperf_client.test_stats_interval = 0.1
-    # print(iperf_client)
-    iperf_client.json_output = True
-    iperf_client.json_stream_output = 1
+    def parse_pipe_data(self, data):
+        try:
+            data_dict = json.loads(data)
+        except Exception:
+            data_dict = {}
+            return None  # self.force_print("bad json")
 
-    # Create plot
-    plot = figure(
-        title=title_with_timestamp,
-        title="YAY",
-        x_axis_label=settings["X Axis Label"],
-        y_axis_label="Mbits / sec",
-    )
+        try:
+            data = data_dict.get("data", {})
+            packet_sums = data.get("sum", {})
+            if packet_sums:
+                bits_per_second = packet_sums.get("bits_per_second", 0.0)
+                end_time = packet_sums.get("end", 0.0)
 
-    update()
+                return (end_time, bits_per_second)
+        except (KeyError, IndexError):
+            return None
 
-
-def update():
-    global settings
-    global process
-    global source
-    global worker_thread
-    global iperf_client
-    try:
-        if worker_thread is None:
-            # command = [
-            # "iperf3",
-            # "-c",
-            # settings["Host"],
-            # "-p",
-            # settings["Port"],
-            # "-i",
-            # settings["Interval"],
-            # "-t",
-            # settings["Test Length"],
-            # "-f",
-            # "m",
-            # "--forceflush",
-            # ]
-            # process = subprocess.Popen(command, stdout=subprocess.PIPE)
-            worker_thread = threading.Thread(target=iperf_client.run())
-            worker_thread.start()
-        # line = process.stdout.readline().decode().strip()
-        # parse data here
-        # data_x, data_y = parse_line(line)
-        # source.stream(dict(x=[data_x], y=[data_y]))
-    except ParseException as e:
-        print(f"\033[31m{e.message}, line = {e.line}")
-        print(Fore.GREEN)
-    except UnboundLocalError as e:
-        print(f"\033[31mUnbound Local Error- line has no value")
-        print(Fore.GREEN)
-
-
-def parse_line(line):
-    # Regular expression to match time and speed
-    # maybe new regex r"\[\s*\d+\]\s*([\d.]+)-([\d.]+)\s*sec.*\s*([\d.]+)\s*M?bits/sec"
-    match = re.search(
-        r"\[\s*\d+\]\s*([\d.]+)-([\d.]+)\s*sec.*\s([\d.]+)\s*Mbits/sec", line
-    )
-
-    if match:
-        end_time = float(match.group(2))
-        speed = float(match.group(3))
-
-        return end_time, speed
-
-    else:
-        raise ParseException("Cannot Parse (probably start or end of data)", line)
-
-
-class ParseException(Exception):
-    def __init__(self, message, line):
-        self.line = line
-        self.message = message
-        super().__init__(message)
-
-
-start()
+    def force_print(self, message):
+        message = message + "\n"
+        os.write(self._stdout_fd, message.encode())

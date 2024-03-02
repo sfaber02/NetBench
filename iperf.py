@@ -701,7 +701,6 @@ class Client(IPerf3):
             self.lib.iperf_set_test_reverse(self._test, 1)
         else:
             self.lib.iperf_set_test_reverse(self._test, 0)
-
         self._reverse = enabled
 
     def run(self):
