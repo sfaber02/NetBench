@@ -16,6 +16,13 @@ A tool to run network speed benchmarks and create graphs of the results.
 1. Enter pipenv shell `pipenv shell` must be python > 3.11
 2. Start testing with `start-test.sh` from root of project
 
+
+## Build
+Currently the iperf c library is compiled for arm macs.  
+You can build an executable on mac by installing `pyinstaller`
+And running `pyinstaller netbench.spec` from the root of the project
+
+
 ## Ideas
 - user inputs
     - save to file and load last inputs as defaults

@@ -122,8 +122,6 @@ class NetBench(Client):
         os.close(self._pipe_in)
         os.close(self._pipe_out)
         self.force_print("Test Complete!")
-        self.force_print("************")
-        self.force_print("************")
 
     def update_graph(self):
         try:
