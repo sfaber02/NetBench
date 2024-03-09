@@ -75,7 +75,7 @@ class NetBench(Client):
 
         # Initialize Bokeh server and start it in a new Thread.
         self.bokeh_server = Server(
-            {"/bkapp": Application(FunctionHandler(self.modify_doc))},
+            {"/netbench": Application(FunctionHandler(self.modify_doc))},
             io_loop=IOLoop(),
             address="localhost",
             port=8000,
@@ -88,7 +88,7 @@ class NetBench(Client):
         self.force_print("************")
         self.force_print("************")
         self.force_print("All Threads Started! Commencing Test")
-        self.force_print("Navigate to localhost:8000 in browser to see graph")
+        self.force_print("Navigate to localhost:8000/netbench in browser to see graph")
         self.force_print("************")
         self.force_print("************")
 
