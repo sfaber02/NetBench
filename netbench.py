@@ -57,11 +57,13 @@ class NetBench(Client):
         )
         self.plot.width = int(self.settings["Width"])
         self.plot.height = int(self.settings["Height"])
-        self.plot.line(x="x", y="y", source=self.column_data)
+        self.plot.line(
+            x="x",
+            y="y",
+            source=self.column_data,
+            line_color=self.settings["Line Color"],
+        )
         self.bokeh_server: Server
-        # self.curdoc = curdoc()
-        # self.curdoc.theme = self.settings["Theme"]
-        # self.curdoc.add_root(self.plot)
 
     def start_test(self) -> None:
         # start iperf test
