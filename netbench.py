@@ -151,7 +151,7 @@ class NetBench(Client):
                 bits_per_second = packet_sums.get("bits_per_second", 0.0)
                 end_time = packet_sums.get("end", 0.0)
 
-                return (end_time, bits_per_second)
+                return (end_time, bits_per_second / 1000000)
         except (KeyError, IndexError):
             return None
 

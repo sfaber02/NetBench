@@ -1,5 +1,5 @@
 import json
-from typing import Dict, Union, Optional, Set
+from typing import Dict, Union, Optional, List
 from datetime import datetime
 
 
@@ -12,7 +12,7 @@ class Settings:
         print(
             "Input Test Settings - No User Input Will Use Last Known Value or Default Value"
         )
-        self.fields: Set[str] = {
+        self.fields: List[str] = [
             "Title",
             "X Axis Label",
             "Width",
@@ -24,7 +24,7 @@ class Settings:
             "Port",
             "Interval",
             "Test Length",
-        }
+        ]
 
         for field in self.fields:
             self.get_input(field)
