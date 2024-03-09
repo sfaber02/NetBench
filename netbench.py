@@ -86,6 +86,7 @@ class NetBench(Client):
         self.force_print("************")
         self.force_print("************")
         self.force_print("All Threads Started! Commencing Test")
+        self.force_print("Navigate to localhost:8000 in browser to see graph")
         self.force_print("************")
         self.force_print("************")
 
