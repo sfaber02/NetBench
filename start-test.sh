@@ -1,6 +1,3 @@
 #!/bin/bash
 
-bokeh serve --show main.py
-
-
-
+python3 main.py
