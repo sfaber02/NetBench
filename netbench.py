@@ -2,10 +2,13 @@ from bokeh.models import ColumnDataSource
 from bokeh.plotting import curdoc, figure
 from bokeh.server.server import Server
 from bokeh.application import Application
+from bokeh.application.handlers.function import FunctionHandler
+from tornado.ioloop import IOLoop
 
 # from colorama import Fore
 from iperf import Client
 from settings import Settings
+import threading
 from threading import Thread
 from multiprocessing import Pipe
 import os
@@ -35,8 +38,8 @@ class NetBench(Client):
         self.worker_thread: Thread
         # thread to read pipe
         self.pipe_thread: Thread
-        # thread to plot graph
-        self.graph_thread: Thread
+        # thread for bokeh server
+        self.bokeh_thread: Thread
         # store original stdout for later
         self._stdout_fd = os.dup(1)
         self._stderr_fd = os.dup(2)
@@ -55,9 +58,10 @@ class NetBench(Client):
         self.plot.width = int(self.settings["Width"])
         self.plot.height = int(self.settings["Height"])
         self.plot.line(x="x", y="y", source=self.column_data)
-        self.curdoc = curdoc()
-        self.curdoc.theme = self.settings["Theme"]
-        self.curdoc.add_root(self.plot)
+        self.bokeh_server: Server
+        # self.curdoc = curdoc()
+        # self.curdoc.theme = self.settings["Theme"]
+        # self.curdoc.add_root(self.plot)
 
     def start_test(self) -> None:
         # start iperf test
@@ -66,14 +70,31 @@ class NetBench(Client):
         # start pipe worker
         self.pipe_thread = Thread(target=self.pipe_reader)
         self.pipe_thread.start()
-        # self.graph_reader()
-        self.graph_thread = Thread(target=self.start_graph)
-        self.graph_thread.start()
 
+        # Initialize Bokeh server and start it in a new Thread.
+        self.bokeh_server = Server(
+            {'/bkapp': Application(FunctionHandler(self.modify_doc))},
+            io_loop=IOLoop(),
+            address='localhost',
+            port=8000,
+            allow_websocket_origin=["localhost:8000"]
+        )
+        self.bokeh_thread = Thread(target=self.start_bokeh_server)
+        self.bokeh_thread.daemon = True
+        self.bokeh_thread.start()
+        
+        self.force_print("************")
+        self.force_print("************")
         self.force_print("All Threads Started! Commencing Test")
+        self.force_print("************")
+        self.force_print("************")
 
-    def init_bokeh_server(self):
-        pass
+    def start_bokeh_server(self):
+        self.bokeh_server.start()
+        try:
+            self.bokeh_server.io_loop.start()
+        except RuntimeError:
+            pass
 
     def pipe_reader(self) -> None:
         while self.worker_thread.is_alive():
@@ -93,17 +114,22 @@ class NetBench(Client):
                 break
             # slow down worker loop 50ms
             time.sleep(0.05)
-        self.force_print("LOOP DEAD")
-        self.curdoc.remove_periodic_callback(self.graph_callback)
+        self.bokeh_server.io_loop.stop()
+        self.bokeh_server.stop()
         os.close(self._pipe_in)
         os.close(self._pipe_out)
+        self.force_print("Test Complete!")
+        self.force_print("************")
+        self.force_print("************")
 
     def update_graph(self):
         try:
             x, y = self.plot_queue.popleft()
             self.column_data.stream(dict(x=[x], y=[y]))
         except IndexError:
-            pass
+            if not self.worker_thread.is_alive():
+                if self.graph_callback:
+                    curdoc().remove_periodic_callback(self.graph_callback)
 
     def start_graph(self):
         self.graph_callback = self.curdoc.add_periodic_callback(self.update_graph, 0.2)
@@ -125,6 +151,11 @@ class NetBench(Client):
                 return (end_time, bits_per_second)
         except (KeyError, IndexError):
             return None
+
+    def modify_doc(self, doc):
+        doc.add_root(self.plot)
+        doc.theme = self.settings["Theme"]
+        self.graph_callback = doc.add_periodic_callback(self.update_graph, 0.2)
 
     def force_print(self, message):
         message = message + "\n"
