@@ -73,16 +73,16 @@ class NetBench(Client):
 
         # Initialize Bokeh server and start it in a new Thread.
         self.bokeh_server = Server(
-            {'/bkapp': Application(FunctionHandler(self.modify_doc))},
+            {"/bkapp": Application(FunctionHandler(self.modify_doc))},
             io_loop=IOLoop(),
-            address='localhost',
+            address="localhost",
             port=8000,
-            allow_websocket_origin=["localhost:8000"]
+            allow_websocket_origin=["localhost:8000"],
         )
         self.bokeh_thread = Thread(target=self.start_bokeh_server)
         self.bokeh_thread.daemon = True
         self.bokeh_thread.start()
-        
+
         self.force_print("************")
         self.force_print("************")
         self.force_print("All Threads Started! Commencing Test")
