@@ -109,7 +109,7 @@ class IPerf3(object):
         #          lib_name = 'libiperf.so.0'
 
         try:
-            self.lib = cdll.LoadLibrary("./windows/libiperf.a")
+            self.lib = cdll.LoadLibrary("./iperf/lib/libiperf.dylib")
         except OSError:
             raise OSError(
                 "Couldn't find shared library {}, is iperf3 installed?".format(lib_name)
