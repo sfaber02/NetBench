@@ -10,17 +10,23 @@ A tool to run network speed benchmarks and create graphs of the results.
 
 ## Run
 
-### Host
-1. Start `iperf3` server on host machine with `iperf3 -s`
+### Server
+1. On server machine download iperf3 from (here)[https://iperf.fr/iperf-download.php]
+2. Start `iperf3` in server mode with `iperf3 -s` taking note of ip and port the server is running on.
 ### Client
 1. Enter pipenv shell `pipenv shell` must be python > 3.11
-2. Start testing with `start-test.sh` from root of project
+2. Install bokeh graphing library with `pip install bokeh`
+3. Start testing with `start-test.sh` from root of project and follow terminal instructions.
 
 
 ## Build
-Currently the iperf c library is compiled for arm macs.  
-You can build an executable on mac by installing `pyinstaller`
+Alternately you can compile an executeable for arm macs.  Presently there is only an executeable for the client, not the server.  We have plans to cross compile client / server binaries for all platforms in the future.
+
+You can build an executable by installing `pyinstaller`
 And running `pyinstaller netbench.spec` from the root of the project
+
+## Example of a test graph.
+![screenshot of netbench graph](<Screenshot 2024-06-24 at 8.47.41 PM.png>)
 
 
 ## Ideas
