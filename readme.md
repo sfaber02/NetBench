@@ -11,7 +11,7 @@ A tool to run network speed benchmarks and create graphs of the results.
 ## Run
 
 ### Server
-1. On server machine download iperf3 from (here)[https://iperf.fr/iperf-download.php]
+1. On server machine download iperf3 from [here](https://iperf.fr/iperf-download.php)
 2. Start `iperf3` in server mode with `iperf3 -s` taking note of ip and port the server is running on.
 ### Client
 1. Enter pipenv shell `pipenv shell` must be python > 3.11
