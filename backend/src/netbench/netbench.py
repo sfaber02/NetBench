@@ -6,8 +6,8 @@ from bokeh.application.handlers.function import FunctionHandler
 from tornado.ioloop import IOLoop
 
 # from colorama import Fore
-from iperf import Client
-from settings import Settings
+from .iperf import Client
+from .settings import Settings
 import threading
 from threading import Thread
 from multiprocessing import Pipe

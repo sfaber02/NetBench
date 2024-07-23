@@ -96,20 +96,15 @@ class IPerf3(object):
     """
 
     def __init__(self, role, verbose=True, lib_name=None):
-        """Initialise the iperf shared library
+        # Initialise the iperf shared library
 
-        :param role: 'c' = client; 's' = server
-        :param verbose: enable verbose output
-        :param lib_name: optional name and path for libiperf.so.0 library
-        """
-        #  if lib_name is None:
-        #      lib_name = util.find_library('libiperf')
-        #      if lib_name is None:
-        #          # If we still couldn't find it lets try the manual approach
-        #          lib_name = 'libiperf.so.0'
+
+        # Construct a relative path to the library
+        dir_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+        lib_path = os.path.join(dir_path, "iperf", "lib", "libiperf.0.dylib")
 
         try:
-            self.lib = cdll.LoadLibrary("./iperf/lib/libiperf.0.dylib")
+            self.lib = cdll.LoadLibrary(lib_path)
         except OSError:
             raise OSError(
                 "Couldn't find shared library {}, is iperf3 installed?".format(lib_name)
