@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package netbench;
+
+service Netbench {
+    rpc StartTest (StartTestRequest) returns (stream TestStream) {}
+    rpc ConfigTest(ConfigTestRequest) returns (ConfigTestResponse) {}
+}
+
+message StartTestRequest {
+    string name = 1;
+    optional repeated string butt = 2;
+}
+
+message TestStream {
+    string bytesPerSecond = 1;
+}
+
+message ConfigTestRequest {
+    string name = 1;
+    optional repeated string butt = 2;
+}
+
+message ConfigTestResponse {
+    string name = 1;
+    optional repeated string butt = 2;
+}
