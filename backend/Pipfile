@@ -6,6 +6,10 @@ name = "pypi"
 [packages]
 bokeh = "*"
 colorama = "*"
+#TODO replace with specific versions
+grpcio = "*"
+grpcio-tools = "*"
+grpcio-reflection = "*"
 
 [dev-packages]
 
@@ -13,3 +17,5 @@ colorama = "*"
 python_version = "3.11"
 python_full_version = "3.11.1"
 bokeh = "*"
+grpcio = "*"
+grpcio-tools = "*"
