@@ -6,12 +6,7 @@ import warnings
 import sys
 from pathlib import Path
 
-# Assuming `test_pb2.py` is in the same directory as `test_pb2_grpc.py`
-current_dir = Path(__file__).parent
-if str(current_dir) not in sys.path:
-    sys.path.append(str(current_dir))
-
-import test_pb2 as test__pb2
+from src.proto.generated import test_pb2 as test__pb2
 
 
 GRPC_GENERATED_VERSION = '1.65.1'

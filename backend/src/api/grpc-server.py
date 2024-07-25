@@ -8,21 +8,6 @@ from pathlib import Path
 
 from src.proto.generated import test_pb2_grpc, test_pb2
 
-#
-# # Calculate the absolute path to the 'proto/generated' directory
-# proto_generated_path = str(Path(__file__).resolve().parents[2] / 'proto' / 'generated')
-#
-# # Add this path to sys.path
-# if proto_generated_path not in sys.path:
-#     sys.path.append(proto_generated_path)
-
-print (f"******* {sys.path}")
-
-# Now you can import your pb2 files directly
-
-
-
-
 class GreeterServicer(test_pb2_grpc.GreeterServicer):
     def SayHello(self, request, context):
         return test_pb2.HelloReply(message='Hello, %s!' % request.name)
