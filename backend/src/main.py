@@ -5,4 +5,4 @@ settings = Settings()
 settings.get_user_inputs()
 
 netbench = Netbench(settings.settings)
-netbench.start_test()
+netbench.start_test_threads()

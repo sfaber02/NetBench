@@ -14,17 +14,14 @@ class NetbenchServer(NetbenchService, netbench_pb2_grpc.NetbenchServicer):
 
 
     def StartTest(self, request: netbench_pb2.EmptyRequest, context: grpc.ServicerContext) -> Iterator[netbench_pb2.TestPacket]:
-        # Implementation of StartTest
-        for i in range(10):
-            yield netbench_pb2.TestPacket(time=i, bitsPerSecond=1000.0 * i)
-            time.sleep(1)
+        return NetbenchService.run_test(self)
+
 
     def SaveSettings(self, request: netbench_pb2.TestSettings, context: grpc.ServicerContext) -> netbench_pb2.SaveSettingsResponse:
-        # Implementation of SaveSettings
+        # mock  Implementation of SaveSettings
         return netbench_pb2.SaveSettingsResponse(success=True)
 
     def GetSettings(self, request: netbench_pb2.EmptyRequest, context: grpc.ServicerContext) -> netbench_pb2.TestSettings:
-        # Implementation of GetSettings
         return NetbenchService.get_settings(self)
 
 

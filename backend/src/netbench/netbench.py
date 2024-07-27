@@ -19,9 +19,12 @@ from typing import Union, Tuple, Dict
 
 
 class Netbench(Client):
-    def __init__(self, settings):
+    def __init__(self, settings, web=False):
         # iperf python client base class
         super().__init__()
+
+        #flag for web / terminal mode
+        self.web = web
 
         self.server_hostname = settings["Host"]
         self.port = settings["Port"]
@@ -47,6 +50,7 @@ class Netbench(Client):
         # os.dup2(self._pipe_in, 2)  # stderr
 
         # column data for bokeh
+        #todo move to separate class or method
         self.column_data = ColumnDataSource(dict(x=[], y=[]))
         self.plot_queue: deque = deque()
         self.plot = figure(
@@ -65,7 +69,7 @@ class Netbench(Client):
         )
         self.bokeh_server: Server
 
-    def start_test(self) -> None:
+    def start_test_threads(self) -> None:
         # start iperf test
         self.worker_thread = Thread(target=self.run)
         self.worker_thread.start()
@@ -73,22 +77,27 @@ class Netbench(Client):
         self.pipe_thread = Thread(target=self.pipe_reader)
         self.pipe_thread.start()
 
-        # Initialize Bokeh server and start it in a new Thread.
-        self.bokeh_server = Server(
-            {"/netbench": Application(FunctionHandler(self.modify_doc))},
-            io_loop=IOLoop(),
-            address="localhost",
-            port=8000,
-            allow_websocket_origin=["localhost:8000"],
-        )
-        self.bokeh_thread = Thread(target=self.start_bokeh_server)
-        self.bokeh_thread.daemon = True
-        self.bokeh_thread.start()
+        # don't start bokeh server if web flag is set
+        if not self.web:
+            # Initialize Bokeh server and start it in a new Thread.
+            self.start_bokeh_server
+            self.bokeh_server = Server(
+                {"/netbench": Application(FunctionHandler(self.modify_doc))},
+                io_loop=IOLoop(),
+                address="localhost",
+                port=8000,
+                allow_websocket_origin=["localhost:8000"],
+            )
+            self.bokeh_thread = Thread(target=self.start_bokeh_server)
+            self.bokeh_thread.daemon = True
+            self.bokeh_thread.start()
+
 
         self.force_print("************")
         self.force_print("************")
         self.force_print("All Threads Started! Commencing Test")
-        self.force_print("Navigate to localhost:8000/netbench in browser to see graph")
+        if not self.web:
+            self.force_print("Navigate to localhost:8000/netbench in browser to see graph")
         self.force_print("************")
         self.force_print("************")
 
@@ -131,6 +140,15 @@ class Netbench(Client):
             if not self.worker_thread.is_alive():
                 if self.graph_callback:
                     curdoc().remove_periodic_callback(self.graph_callback)
+
+    def pop_plot_queue(self) -> Tuple[float, float]:
+        try:
+            seconds, bits_per_second = self.plot_queue.popleft()
+            return float(seconds), float(bits_per_second)
+        except IndexError:
+            #todo remove this for testing
+            return 0.0, 0.0
+
 
     def start_graph(self):
         self.graph_callback = self.curdoc.add_periodic_callback(self.update_graph, 0.2)
