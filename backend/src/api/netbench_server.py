@@ -3,9 +3,16 @@ import grpc
 from typing import Iterator
 from src.proto.generated import netbench_pb2_grpc, netbench_pb2
 from grpc_reflection.v1alpha import reflection
+from netbench_service import NetbenchService
+from src.netbench.settings import Settings
 
 
-class NetbenchServicer(netbench_pb2_grpc.NetbenchServicer):
+
+class NetbenchServicer(netbench_pb2_grpc.NetbenchServicer, NetbenchService):
+    def __init__(self):
+        settings = Settings().settings
+        super().__init__(settings)
+
     def StartTest(self, request: netbench_pb2.EmptyRequest, context: grpc.ServicerContext) -> Iterator[netbench_pb2.TestPacket]:
         # Implementation of StartTest
         for i in range(10):

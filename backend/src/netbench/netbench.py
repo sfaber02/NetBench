@@ -18,7 +18,7 @@ import time
 from typing import Union, Tuple, Dict
 
 
-class NetBench(Client):
+class Netbench(Client):
     def __init__(self, settings):
         # iperf python client base class
         super().__init__()
