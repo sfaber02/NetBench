@@ -6,7 +6,6 @@ from datetime import datetime
 class Settings:
     def __init__(self):
         self.settings: Dict[str, Union[str, int]] = self.get_settings_from_disk()
-        self.get_user_inputs()
 
     def get_user_inputs(self) -> None:
         print(

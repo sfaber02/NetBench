@@ -5,18 +5,22 @@ from src.proto.generated import netbench_pb2_grpc, netbench_pb2
 from grpc_reflection.v1alpha import reflection
 from netbench_service import NetbenchService
 from src.netbench.settings import Settings
+import time
 
 
-
-class NetbenchServicer(netbench_pb2_grpc.NetbenchServicer, NetbenchService):
+class NetbenchServer(NetbenchService, netbench_pb2_grpc.NetbenchServicer):
     def __init__(self):
-        settings = Settings().settings
+        settings = Settings().get_settings_from_disk()
+        print (settings)
         super().__init__(settings)
+        self.force_print("Server initialized")
+
 
     def StartTest(self, request: netbench_pb2.EmptyRequest, context: grpc.ServicerContext) -> Iterator[netbench_pb2.TestPacket]:
         # Implementation of StartTest
         for i in range(10):
             yield netbench_pb2.TestPacket(time=i, bitsPerSecond=1000.0 * i)
+            time.sleep(1)
 
     def SaveSettings(self, request: netbench_pb2.TestSettings, context: grpc.ServicerContext) -> netbench_pb2.SaveSettingsResponse:
         # Implementation of SaveSettings
@@ -35,7 +39,7 @@ class NetbenchServicer(netbench_pb2_grpc.NetbenchServicer, NetbenchService):
 
 def serve() -> None:
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    netbench_pb2_grpc.add_NetbenchServicer_to_server(NetbenchServicer(), server)
+    netbench_pb2_grpc.add_NetbenchServicer_to_server(NetbenchServer(), server)
     server.add_insecure_port('[::]:50051')
 
     # Enable reflection

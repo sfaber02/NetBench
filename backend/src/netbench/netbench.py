@@ -161,3 +161,5 @@ class Netbench(Client):
     def force_print(self, message):
         message = message + "\n"
         os.write(self._stdout_fd, message.encode())
+
+
