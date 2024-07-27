@@ -19,16 +19,15 @@ from typing import Union, Tuple, Dict
 
 
 class NetBench(Client):
-    def __init__(self):
+    def __init__(self, settings):
         # iperf python client base class
         super().__init__()
-        self.settings = Settings().settings
 
-        self.server_hostname = self.settings["Host"]
-        self.port = self.settings["Port"]
-        self.duration = int(self.settings["Test Length"])
-        self.test_reporter_interval = float(self.settings["Interval"])
-        self.test_stats_interval = float(self.settings["Interval"])
+        self.server_hostname = settings["Host"]
+        self.port = settings["Port"]
+        self.duration = int(settings["Test Length"])
+        self.test_reporter_interval = float(settings["Interval"])
+        self.test_stats_interval = float(settings["Interval"])
         self.json_output = True
         self.json_stream_output = 1
 
@@ -51,17 +50,18 @@ class NetBench(Client):
         self.column_data = ColumnDataSource(dict(x=[], y=[]))
         self.plot_queue: deque = deque()
         self.plot = figure(
-            title=self.settings["Title"],
-            x_axis_label=self.settings["X Axis Label"],
+            title=settings["Title"],
+            x_axis_label=settings["X Axis Label"],
             y_axis_label="Mbits / sec",
         )
-        self.plot.width = int(self.settings["Width"])
-        self.plot.height = int(self.settings["Height"])
+        self.plot.width = int(settings["Width"])
+        self.plot.height = int(settings["Height"])
+        self.theme = settings["Theme"]
         self.plot.line(
             x="x",
             y="y",
             source=self.column_data,
-            line_color=self.settings["Line Color"],
+            line_color=settings["Line Color"],
         )
         self.bokeh_server: Server
 
@@ -149,13 +149,13 @@ class NetBench(Client):
                 bits_per_second = packet_sums.get("bits_per_second", 0.0)
                 end_time = packet_sums.get("end", 0.0)
 
-                return (end_time, bits_per_second / 1000000)
+                return end_time, bits_per_second / 1000000
         except (KeyError, IndexError):
             return None
 
     def modify_doc(self, doc):
         doc.add_root(self.plot)
-        doc.theme = self.settings["Theme"]
+        doc.theme = self.theme
         self.graph_callback = doc.add_periodic_callback(self.update_graph, 0.2)
 
     def force_print(self, message):
