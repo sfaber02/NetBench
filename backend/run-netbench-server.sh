@@ -5,4 +5,4 @@
 export PYTHONPATH=./
 
 # start server
-python ./src/api/grpc_server.py
+python ./src/api/netbench_server.py

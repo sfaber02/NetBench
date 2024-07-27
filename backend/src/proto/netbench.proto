@@ -3,25 +3,27 @@ syntax = "proto3";
 package netbench;
 
 service Netbench {
-    rpc StartTest (StartTestRequest) returns (stream TestStream) {}
-    rpc ConfigTest(ConfigTestRequest) returns (ConfigTestResponse) {}
+    rpc StartTest (EmptyRequest) returns (stream TestPacket) {}
+    rpc SaveSettings(TestSettings) returns (SaveSettingsResponse) {}
+    rpc GetSettings(EmptyRequest) returns (TestSettings) {}
 }
 
-message StartTestRequest {
-    string name = 1;
-    optional repeated string butt = 2;
+message TestPacket {
+    float time = 1;
+    float bitsPerSecond = 2;
 }
 
-message TestStream {
-    string bytesPerSecond = 1;
+message TestSettings {
+    string title = 1;
+    repeated string tags = 2;
+    string host = 3;
+    int32 port = 4;
+    float interval = 5;
+    int32 duration = 6;
 }
 
-message ConfigTestRequest {
-    string name = 1;
-    optional repeated string butt = 2;
+message SaveSettingsResponse {
+   bool success = 1;
 }
 
-message ConfigTestResponse {
-    string name = 1;
-    optional repeated string butt = 2;
-}
+message EmptyRequest {}

@@ -1,0 +1,15 @@
+# Test StartTest endpoint
+grpcurl -plaintext -d '{}' localhost:50051 netbench.Netbench/StartTest
+
+# Test SaveSettings endpoint
+grpcurl -plaintext -d '{
+  "title": "Network Benchmark",
+  "tags": ["example", "test"],
+  "host": "localhost",
+  "port": 5201,
+  "interval": 1.0,
+  "duration": 10
+}' localhost:50051 netbench.Netbench/SaveSettings
+
+# Test GetSettings endpoint
+grpcurl -plaintext -d '{}' localhost:50051 netbench.Netbench/GetSettings
