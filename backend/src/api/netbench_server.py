@@ -10,10 +10,7 @@ import time
 
 class NetbenchServer(NetbenchService, netbench_pb2_grpc.NetbenchServicer):
     def __init__(self):
-        settings = Settings().get_settings_from_disk()
-        print (settings)
-        super().__init__(settings)
-        self.force_print("Server initialized")
+        super().__init__()
 
 
     def StartTest(self, request: netbench_pb2.EmptyRequest, context: grpc.ServicerContext) -> Iterator[netbench_pb2.TestPacket]:
@@ -28,14 +25,8 @@ class NetbenchServer(NetbenchService, netbench_pb2_grpc.NetbenchServicer):
 
     def GetSettings(self, request: netbench_pb2.EmptyRequest, context: grpc.ServicerContext) -> netbench_pb2.TestSettings:
         # Implementation of GetSettings
-        return netbench_pb2.TestSettings(
-            title="Network Benchmark",
-            tags=["example", "test"],
-            host="localhost",
-            port=5201,
-            interval=1.0,
-            duration=10
-        )
+        return NetbenchService.get_settings(self)
+
 
 def serve() -> None:
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
