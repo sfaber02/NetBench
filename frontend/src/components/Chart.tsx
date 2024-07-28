@@ -1,88 +1,53 @@
-import React from "react";
+import React, { Component } from "react";
+import Chart from "react-apexcharts";
 
-class ApexChart extends React.Component {
-    constructor(props) {
-      super(props);
 
-      this.state = {
-      
-        series: [{
-          data: data.slice()
-        }],
-        options: {
-          chart: {
-            id: 'realtime',
-            height: 350,
-            type: 'line',
-            animations: {
-              enabled: true,
-              easing: 'linear',
-              dynamicAnimation: {
-                speed: 1000
-              }
-            },
-            toolbar: {
-              show: false
-            },
-            zoom: {
-              enabled: false
-            }
-          },
-          dataLabels: {
-            enabled: false
-          },
-          stroke: {
-            curve: 'smooth'
-          },
-          title: {
-            text: 'Dynamic Updating Chart',
-            align: 'left'
-          },
-          markers: {
-            size: 0
-          },
-          xaxis: {
-            type: 'datetime',
-            range: XAXISRANGE,
-          },
-          yaxis: {
-            max: 100
-          },
-          legend: {
-            show: false
-          },
+const Graph: React.FC = () => {
+  return (
+    <div>
+      <h1>Graph</h1>
+    </div>
+  );
+
+}
+class App extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      options: {
+        chart: {
+          id: "basic-bar"
         },
-      
-      
-      };
-    }
-
-  
-    componentDidMount() {
-      window.setInterval(() => {
-        getNewSeries(lastDate, {
-          min: 10,
-          max: 90
-        })
-        
-        ApexCharts.exec('realtime', 'updateSeries', [{
-          data: data
-        }])
-      }, 1000)
-    }
-  
-
-    render() {
-      return (
-        <div>
-          <div id="chart">
-            <ReactApexChart options={this.state.options} series={this.state.series} type="line" height={350} />
-          </div>
-          <div id="html-dist"></div>
-        </div>
-      );
-    }
+        xaxis: {
+          categories: [1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999]
+        }
+      },
+      series: [
+        {
+          name: "series-1",
+          data: [30, 40, 45, 50, 49, 60, 70, 91]
+        }
+      ]
+    };
   }
 
-  const domContainer = document.querySelector('#app');
-  ReactDOM.render(React.createElement(ApexChart), domContainer);
+  render() {
+    return (
+      <div className="app">
+        <div className="row">
+          <div className="mixed-chart">
+            <Chart
+              options={this.state.options}
+              series={this.state.series}
+              type="bar"
+              width="500"
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+}
+
+export default App;
