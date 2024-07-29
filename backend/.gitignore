@@ -9,3 +9,4 @@ dist
 build
 .idea
 venv
+./frontend/node_modules
