@@ -26,8 +26,7 @@ import select
 import json
 import threading
 from socket import SOCK_DGRAM, SOCK_STREAM
-from multiprocessing import Process, Pipe
-
+import platform
 try:
     from queue import Queue
 except ImportError:
@@ -88,20 +87,21 @@ def output_to_screen(stdout_fd, stderr_fd):
     # os.dup2(stdout_fd, 1)
     # os.dup2(stderr_fd, 2)
 
+def is_mac_os():
+    return platform.system() == "Darwin"
+
 
 class IPerf3(object):
-    """The base class used by both the iperf3 :class:`Server` and :class:`Client`
-
-    .. note:: You should not use this class directly
-    """
-
     def __init__(self, role, verbose=True, lib_name=None):
         # Initialise the iperf shared library
 
-
-        # Construct a relative path to the library
         dir_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
-        lib_path = os.path.join(dir_path, "iperf", "lib", "libiperf.0.dylib")
+        if is_mac_os():
+            # if mac os use the custom compiled lib in the iperf folder
+            lib_path = os.path.join(dir_path, "iperf", "lib", "libiperf.0.dylib")
+        else:
+            # version for debian linux maybe other versions but not tests
+            lib_path = os.path.join(dir_path, "iperf", "linux-build", "lib", "libiperf.so.0")
 
         try:
             self.lib = cdll.LoadLibrary(lib_path)
@@ -469,21 +469,6 @@ class IPerf3(object):
 
 
 class Client(IPerf3):
-    """An iperf3 client connection.
-
-    This opens up a connection to a running iperf3 server
-
-    Basic Usage::
-
-      >>> import iperf3
-
-      >>> client = iperf3.Client()
-      >>> client.duration = 1
-      >>> client.server_hostname = '127.0.0.1'
-      >>> client.port = 5201
-      >>> client.run()
-      {'intervals': [{'sum': {...
-    """
 
     def __init__(self, *args, **kwargs):
         """Initialise the iperf shared library"""
