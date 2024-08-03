@@ -1,86 +1,61 @@
-// import * as grpc from '@grpc/grpc-js';
-// import * as protoLoader from '@grpc/proto-loader';
-// import * as path from 'path';
-//
-// // Load the protobuf
-// const PROTO_PATH = path.join(__dirname, 'backend/src/proto/netbench.proto');
-// const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
-//   keepCase: true,
-//   longs: String,
-//   enums: String,
-//   defaults: true,
-//   oneofs: true
-// });
-// const netbenchProto = grpc.loadPackageDefinition(packageDefinition).netbench as any;
-//
-// // Create a client
-// const client = new netbenchProto.Netbench('localhost:50051', grpc.credentials.createInsecure());
-//
-// // Function to call StartTest
-// function startTest(): void {
-//   const call = client.startTest({}, (error: grpc.ServiceError, response: any) => {
-//     if (error) {
-//       console.error('Error:', error);
-//     } else {
-//       console.log('Response:', response);
-//     }
-//   });
-//
-//   call.on('data', (data: any) => {
-//     console.log('TestPacket:', data);
-//   });
-//
-//   call.on('end', () => {
-//     console.log('Stream ended.');
-//   });
-//
-//   call.on('error', (error: grpc.ServiceError) => {
-//     console.error('Stream error:', error);
-//   });
-//
-//   call.on('status', (status: grpc.StatusObject) => {
-//     console.log('Stream status:', status);
-//   });
-// }
-//
-// // Function to call SaveSettings
-// function saveSettings(settings: any, callback: (error: grpc.ServiceError | null, response: any) => void): void {
-//   client.saveSettings(settings, (error: grpc.ServiceError, response: any) => {
-//     if (error) {
-//       console.error('Error:', error);
-//     } else {
-//       console.log('SaveSettingsResponse:', response);
-//     }
-//     if (callback) callback(error, response);
-//   });
-// }
-//
-// // Function to call GetSettings
-// function getSettings(callback: (error: grpc.ServiceError | null, response: any) => void): void {
-//   client.getSettings({}, (error: grpc.ServiceError, response: any) => {
-//     if (error) {
-//       console.error('Error:', error);
-//     } else {
-//       console.log('TestSettings:', response);
-//     }
-//     if (callback) callback(error, response);
-//   });
-// }
-//
-// Example usage
-// startTest();
-// saveSettings({ title: 'Test', tags: ['example'], host: 'localhost', port: 8080, interval: 1.0, duration: 60 }, (err, res) => {
-//   if (!err) {
-//     getSettings((error, response) => {
-//       if (!error) {
-//         console.log('Settings:', response);
-//       }
-//     });
-//   }
-// });
-//
-//
-// // Export the functions
-// export { startTest, saveSettings, getSettings };
+import * as grpc from '@grpc/grpc-js';
+import * as path from 'path';
+import { NetbenchClient } from './proto/generated/netbench_grpc_pb';
+import { EmptyRequest, TestSettings, SaveSettingsResponse } from './proto/generated/netbench_pb';
+import {genericTestSettings} from "./BaseTestSettings";
 
-export {}
+
+class NetbenchClientWrapper {
+    private client: NetbenchClient;
+    private serverAddress: string = 'localhost:50051';
+
+    constructor() {
+        this.client = new NetbenchClient(this.serverAddress, grpc.credentials.createInsecure());
+    }
+
+    public startTest(callback: (error: grpc.ServiceError | null, response: TestSettings) => void): void {
+        const call = this.client.startTest(new EmptyRequest());
+
+        call.on('data', (data: TestSettings) => {
+            console.log('TestPacket:', data.toObject());
+            if (callback) callback(null, data);
+        });
+
+        call.on('end', () => {
+            console.log('Stream ended.');
+        });
+
+        call.on('error', (error: grpc.ServiceError) => {
+            console.error('Stream error:', error);
+            if (callback) callback(error, genericTestSettings);
+        });
+
+        call.on('status', (status: grpc.StatusObject) => {
+            console.log('Stream status:', status);
+        });
+    }
+
+    public saveSettings(settings: TestSettings, callback: (error: grpc.ServiceError | null, response: SaveSettingsResponse) => void): void {
+        this.client.saveSettings(settings, (error, response) => {
+            if (error) {
+                console.error('Error:', error);
+            } else {
+                console.log('SaveSettingsResponse:', response.toObject());
+            }
+            if (callback) callback(error, response);
+        });
+    }
+
+    public getSettings(callback: (error: grpc.ServiceError | null, response: TestSettings) => void): void {
+        this.client.getSettings(new EmptyRequest(), (error, response) => {
+            if (error) {
+                console.error('Error:', error);
+            } else {
+                console.log('TestSettings:', response.toObject());
+            }
+            if (callback) callback(error, response);
+        });
+    }
+}
+
+export { NetbenchClientWrapper };
