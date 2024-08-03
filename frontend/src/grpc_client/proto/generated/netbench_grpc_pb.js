@@ -1,7 +1,7 @@
 // GENERATED CODE -- DO NOT EDIT!
 
 'use strict';
-var grpc = require('@grpc/grpc-js');
+var grpc = require('grpc');
 var netbench_pb = require('./netbench_pb.js');
 
 function serialize_netbench_EmptyRequest(arg) {
