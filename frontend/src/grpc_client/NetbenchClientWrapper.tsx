@@ -1,5 +1,4 @@
 import * as grpc from '@grpc/grpc-js';
-import * as path from 'path';
 import { NetbenchClient } from './proto/generated/netbench_grpc_pb';
 import { EmptyRequest, TestSettings, SaveSettingsResponse } from './proto/generated/netbench_pb';
 import {genericTestSettings} from "./BaseTestSettings";

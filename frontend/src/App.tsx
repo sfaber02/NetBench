@@ -4,10 +4,14 @@ import FormContainer from './components/InputForm';
 
 
 import './App.css';
+import {TestGrpcClientComponent} from "./components/TestGrpcClient";
 
 const App: React.FC = () => {
   return (
-    <FormContainer/>
+      <div>
+          {/*<FormContainer/>*/}
+          <TestGrpcClientComponent/>
+      </div>
   )
 }
 

@@ -7,7 +7,6 @@
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
-    "@types/jest": "^27.5.2",
     "@types/node": "^16.18.104",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
@@ -21,10 +20,15 @@
     "typescript": "^4.9.5",
     "web-vitals": "^2.1.4"
   },
+  "devDependencies": {
+    "@types/jest": "^27.5.2",
+    "jest": "^27.0.0",
+    "ts-jest": "^27.1.5"
+  },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test",
+    "test": "jest",
     "eject": "react-scripts eject",
     "generate:proto": "grpc_tools_node_protoc --ts_out=grpc_js:./src/grpc_client/proto/generated --js_out=import_style=commonjs,binary:./src/grpc_client/proto/generated --grpc_out=grpc_js:./src/grpc_client/proto/generated --proto_path=./src/grpc_client/proto ./src/grpc_client/proto/netbench.proto"
   },
