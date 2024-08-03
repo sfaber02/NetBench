@@ -1,7 +1,19 @@
 import { DomainTestSettings, DomainTestPacket } from '../src/types/DomainTypes';
 import { TestSettings, TestPacket } from '../src/grpc_client/proto/generated/netbench_pb';
+import {genericTestSettings} from "../src/grpc_client/BaseTestSettings";
 
 describe('DomainTestSettings', () => {
+    it('should correctly initialize with genericTestSettings values', () => {
+        const domainTestSettings = new DomainTestSettings();
+
+        expect(domainTestSettings.title).toBe(genericTestSettings.getTitle());
+        expect(domainTestSettings.tags).toEqual(genericTestSettings.getTagsList());
+        expect(domainTestSettings.host).toBe(genericTestSettings.getHost());
+        expect(domainTestSettings.port).toBe(genericTestSettings.getPort());
+        expect(domainTestSettings.interval).toBe(genericTestSettings.getInterval());
+        expect(domainTestSettings.duration).toBe(genericTestSettings.getDuration());
+    });
+
     it('should correctly convert from proto', () => {
         const proto = new TestSettings();
         proto.setTitle('Test Title');
