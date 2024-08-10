@@ -1,5 +1,6 @@
 import React from "react";
 import FormContainer from "./components/FormContainer";
+import { SmoothieChart } from "smoothie";
 
 import "./App.css";
 
