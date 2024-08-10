@@ -1,15 +1,10 @@
-import React, {useState} from 'react';
-import logo from './logo.svg';
-import FormContainer from './components/InputForm';
+import React from "react";
+import FormContainer from "./components/FormContainer";
 
-
-import './App.css';
+import "./App.css";
 
 const App: React.FC = () => {
-  return (
-    <FormContainer/>
-  )
-}
+  return <FormContainer />;
+};
 
 export default App;
-
