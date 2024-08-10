@@ -1,0 +1,12 @@
+Pipfile.lock
+__pycache__/iperf.cpython-311.pyc
+test_settings.json
+config
+config
+tags
+__pycache__
+dist
+build
+.idea
+venv
+frontend/node_modules
