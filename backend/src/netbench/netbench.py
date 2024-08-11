@@ -6,8 +6,8 @@ from bokeh.application.handlers.function import FunctionHandler
 from tornado.ioloop import IOLoop
 
 # from colorama import Fore
-from .iperf import Client
-from .settings import Settings
+from iperf import Client
+from settings import Settings
 import threading
 from threading import Thread
 from multiprocessing import Pipe
@@ -18,10 +18,24 @@ import time
 from typing import Union, Tuple, Dict
 
 
+def timestamp():
+    return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+
+def create_log_file():
+    try:
+        with open("../../../backend/netbench.log", "r") as log_file:
+            pass
+    except FileNotFoundError:
+        with open("../../../backend/netbench.log", "w") as log_file:
+            log_file.write(timestamp() + " - Log File Created\n")
+
 class Netbench(Client):
     def __init__(self, settings, web=False):
         # iperf python client base class
         super().__init__()
+        create_log_file()
+
+        self.log("Init Netbench")
 
         #flag for web / terminal mode
         self.web = web
@@ -34,6 +48,12 @@ class Netbench(Client):
         self.json_output = True
         self.json_stream_output = 1
 
+        # create pipe for frontend to backend communication
+        self.frontend_pipe, self.backend_pipe = Pipe()
+        self.frontend_thread: Thread = Thread(target=self.frontend_communicator)
+        self.frontend_thread.start()
+        self.log("Frontend Communicator Thread Started")
+
         # pipe for json stream test data from iperf
         self.input_data_pipe, self.output_data_pipe = Pipe()
         # thread to run test
@@ -45,29 +65,32 @@ class Netbench(Client):
         # store original stdout for later
         self._stdout_fd = os.dup(1)
         self._stderr_fd = os.dup(2)
-        # redirect stdout
-        os.dup2(self._pipe_in, 1, inheritable=True)
+        # redirect stdout, overwrites stdout with pipe_in
+        # os.dup2(self._pipe_in, 1, inheritable=True)
         # os.dup2(self._pipe_in, 2)  # stderr
 
-        # column data for bokeh
-        #todo move to separate class or method
-        self.column_data = ColumnDataSource(dict(x=[], y=[]))
-        self.plot_queue: deque = deque()
-        self.plot = figure(
-            title=settings["Title"],
-            x_axis_label=settings["X Axis Label"],
-            y_axis_label="Mbits / sec",
-        )
-        self.plot.width = int(settings["Width"])
-        self.plot.height = int(settings["Height"])
-        self.theme = settings["Theme"]
-        self.plot.line(
-            x="x",
-            y="y",
-            source=self.column_data,
-            line_color=settings["Line Color"],
-        )
-        self.bokeh_server: Server
+        # # column data for bokeh
+        # #todo move to separate class or method
+        # self.column_data = ColumnDataSource(dict(x=[], y=[]))
+        # self.plot_queue: deque = deque()
+        # self.plot = figure(
+        #     title=settings["Title"],
+        #     x_axis_label=settings["X Axis Label"],
+        #     y_axis_label="Mbits / sec",
+        # )
+        # self.plot.width = int(settings["Width"])
+        # self.plot.height = int(settings["Height"])
+        # self.theme = settings["Theme"]
+        # self.plot.line(
+        #     x="x",
+        #     y="y",
+        #     source=self.column_data,
+        #     line_color=settings["Line Color"],
+        # )
+        # self.bokeh_server: Server
+
+
+
 
     def start_test_threads(self) -> None:
         # start iperf test
@@ -93,13 +116,13 @@ class Netbench(Client):
             self.bokeh_thread.start()
 
 
-        self.force_print("************")
-        self.force_print("************")
-        self.force_print("All Threads Started! Commencing Test")
+        self.log("************")
+        self.log("************")
+        self.log("All Threads Started! Commencing Test")
         if not self.web:
-            self.force_print("Navigate to localhost:8000/netbench in browser to see graph")
-        self.force_print("************")
-        self.force_print("************")
+            self.log("Navigate to localhost:8000/netbench in browser to see graph")
+        self.log("************")
+        self.log("************")
 
     def start_bokeh_server(self):
         self.bokeh_server.start()
@@ -118,11 +141,11 @@ class Netbench(Client):
                     data_tuple: Tuple[float, float] = self.parse_pipe_data(msg)
                     if data_tuple:
                         self.plot_queue.append(data_tuple)
-                    # self.force_print(msg)
+                    # self.log(msg)
                 else:
-                    self.force_print("EMPTY MSG")
+                    self.log("EMPTY MSG")
             except Exception:
-                self.force_print("ERROR")
+                self.log("ERROR")
                 break
             # slow down worker loop 50ms
             time.sleep(0.05)
@@ -130,7 +153,7 @@ class Netbench(Client):
         self.bokeh_server.stop()
         os.close(self._pipe_in)
         os.close(self._pipe_out)
-        self.force_print("Test Complete!")
+        self.log("Test Complete!")
 
     def update_graph(self):
         try:
@@ -158,7 +181,7 @@ class Netbench(Client):
             data_dict = json.loads(data)
         except Exception:
             data_dict = {}
-            return None  # self.force_print("bad json")
+            return None  # self.log("bad json")
 
         try:
             data = data_dict.get("data", {})
@@ -171,13 +194,38 @@ class Netbench(Client):
         except (KeyError, IndexError):
             return None
 
+    def frontend_communicator(self):
+        self.log("Frontend Communicator Started")
+        while True:
+            time.sleep(0.5)
+            try:
+                # self.log("Frontend Pipe Polling")  # Line 202
+                if self.frontend_pipe.poll():  # Check if there is data to read
+                    self.log("Data available in frontend pipe")
+                    msg = self.frontend_pipe.recv()
+                    self.log(f"Frontend Message: {msg}")  # Line 205
+                    response = self.handle_frontend_message(msg)
+                    self.backend_pipe.send(json.dumps(response))
+                # else:
+                    # self.log("No data in frontend pipe")
+            except Exception as e:
+                self.log(f"Frontend Communicator Error: {e}")
+                break
+
+    def handle_frontend_message(self, msg):
+        # Handle the message from the frontend and return a response
+        return {"status": "received", "message": msg}
+
     def modify_doc(self, doc):
         doc.add_root(self.plot)
         doc.theme = self.theme
         self.graph_callback = doc.add_periodic_callback(self.update_graph, 0.2)
 
-    def force_print(self, message):
-        message = message + "\n"
-        os.write(self._stdout_fd, message.encode())
+    def log(self, message):
+        message = f"{timestamp()} - {message}\n"
+        with open("../../../backend/netbench.log", "a") as log_file:
+            log_file.write(message)
 
+    def write_to_stdout(self, message):
+        os.write(self._stdout_fd, message.encode())
 

@@ -18,7 +18,7 @@ class NetbenchService():
         time_remaining = test_length
         while time_remaining > 0:
             current_time, bits_per_second = self.netbench.pop_plot_queue()
-            self.netbench.force_print(f"Time: {current_time}, Bits Per Second: {bits_per_second}")
+            self.netbench.log(f"Time: {current_time}, Bits Per Second: {bits_per_second}")
             if time is not None and bits_per_second is not None:
                 yield netbench_pb2.TestPacket(time=current_time, bitsPerSecond=bits_per_second)
             time.sleep(refresh_interval)

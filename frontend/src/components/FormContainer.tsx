@@ -1,4 +1,5 @@
-import React, { ChangeEvent, useState } from 'react';
+import React, { ChangeEvent, useState, useEffect } from 'react';
+import { communicateWithPython } from '../backend_client/backend-client';
 
 /* Input fields
 
@@ -43,6 +44,9 @@ const FormContainer: React.FC = () => {
     testLength: '',
   });
 
+  const [backendResponse, setBackendResponse] = useState<string>('Nothing');
+
+
   const handleChange = (field: string) => (event: ChangeEvent<HTMLInputElement>) => {
     setFormValues({
       ...formValues,
@@ -50,7 +54,21 @@ const FormContainer: React.FC = () => {
     });
   };
 
+    useEffect(() => {
+        console.log("Sending message to backend");
+        communicateWithPython('Hello from TypeScript').then(response => {
+            setBackendResponse(response); // Output: { status: 'received', message: 'Hello from TypeScript' }
+            console.log(backendResponse);
+        }).catch(error => {
+            setBackendResponse("FAIL")
+        });
+    }, []);
+
+        
+
+
   return (
+      <div>
     <form>
       <InputForm label="Title" value={formValues.title} onChange={handleChange('title')} />
       <InputForm label="X-Axis Label" value={formValues.xAxisLabel} onChange={handleChange('xAxisLabel')} />
@@ -64,6 +82,8 @@ const FormContainer: React.FC = () => {
       <InputForm label="Interval" value={formValues.interval} onChange={handleChange('interval')} />
       <InputForm label="Test Length" value={formValues.testLength} onChange={handleChange('testLength')} />
     </form>
+    <h1>{backendResponse}</h1>
+    </div>
   )
 
 
