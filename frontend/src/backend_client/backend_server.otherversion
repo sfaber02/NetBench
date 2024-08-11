@@ -1,0 +1,91 @@
+import express from 'express';
+import bodyParser from 'body-parser';
+import { spawn } from 'child_process';
+import ffi from 'ffi-napi';
+import ref from 'ref-napi';
+import StructType from 'ref-struct-di';
+
+// Define the struct for the file descriptors
+const Struct = StructType(ref);
+const PipeStruct = Struct({
+    read_fd: 'int',
+    write_fd: 'int'
+});
+
+const app = express();
+app.use(bodyParser.json());
+
+// Replace 'path_to_your_python_script.py' with the actual path to your Python script
+const pythonProcess = spawn('python3', ['../../../backend/src/netbench/init_netbench_backend.py']);
+
+
+// Store the pipe connections
+let frontendPipe;
+
+// Read the file descriptors from the Python process
+pythonProcess.stdout.once('data', (data) => {
+    // Assuming the data contains the file descriptors
+    const fds = data.toString().trim().split(' ');
+    const read_fd = parseInt(fds[0], 10);
+    const write_fd = parseInt(fds[1], 10);
+
+    frontendPipe = new PipeStruct({
+        read_fd: read_fd,
+        write_fd: write_fd
+    });
+
+    console.log(`File descriptors received: read_fd=${read_fd}, write_fd=${write_fd}`);
+});
+
+// Handle errors
+pythonProcess.stderr.on('data', (data) => {
+    console.error(`Python stderr: ${data}`);
+});
+
+pythonProcess.on('close', (code) => {
+    console.log(`Python process exited with code ${code}`);
+});
+
+// Function to write to the pipe
+function writeToPipe(pipe, message) {
+    const buffer = Buffer.from(message, 'utf8');
+    const bytesWritten = ffi.Library('libc', {
+        'write': ['int', ['int', 'pointer', 'int']]
+    }).write(pipe.write_fd, buffer, buffer.length);
+
+    return bytesWritten;
+}
+
+// Function to read from the pipe
+function readFromPipe(pipe) {
+    const buffer = Buffer.alloc(1024);
+    const bytesRead = ffi.Library('libc', {
+        'read': ['int', ['int', 'pointer', 'int']]
+    }).read(pipe.read_fd, buffer, buffer.length);
+
+    return buffer.toString('utf8', 0, bytesRead);
+}
+
+// Endpoint to send data to the Python backend
+app.post('/api/test', (req, res) => {
+    const message = req.body.message;
+
+    // Send the message to the Python backend
+    writeToPipe(frontendPipe, message);
+
+    // Read the response from the Python backend
+    setTimeout(() => {
+        const response = readFromPipe(frontendPipe);
+        res.json({ response });
+    }, 100); // Small delay to ensure the response is ready
+});
+
+const PORT = 8000;
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
+
+// Handle process exit to cleanup
+process.on('exit', () => {
+    pythonProcess.kill();
+});
