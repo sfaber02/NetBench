@@ -23,7 +23,7 @@ pythonProcess.stderr.on('data', (data) => {
 });
 
 pythonProcess.on('close', (code) => {
-    console.log(`Python process exited with code ${code}`);
+    console.log(`Express: Python process exited with code ${code}`);
 });
 
 app.post('/api/test', (req, res) => {
@@ -36,7 +36,7 @@ app.post('/api/test', (req, res) => {
     // Listen for response from Python process
     pythonProcess.stdout.once('data', (data) => {
         const rawData = data.toString();
-        console.log(`Raw data received from Python: ${rawData}`);
+        console.log(`Express: Raw data received from Python: ${rawData}`);
         try {
             const jsonData = JSON.parse(rawData);
             res.json(jsonData);

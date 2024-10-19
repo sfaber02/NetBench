@@ -10,3 +10,4 @@ build
 .idea
 venv
 ../frontend/node_modules
+netbench.log

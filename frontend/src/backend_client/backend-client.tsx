@@ -13,4 +13,8 @@ async function communicateWithPython(message: string) {
     }
 }
 
+// async function startTest() {
+//     try:
+//
+// }
 export { communicateWithPython };

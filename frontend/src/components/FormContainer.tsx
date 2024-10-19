@@ -64,24 +64,11 @@ const FormContainer: React.FC = () => {
         });
     }, []);
 
-        
+
 
 
   return (
       <div>
-    <form>
-      <InputForm label="Title" value={formValues.title} onChange={handleChange('title')} />
-      <InputForm label="X-Axis Label" value={formValues.xAxisLabel} onChange={handleChange('xAxisLabel')} />
-      <InputForm label="Width" value={formValues.width} onChange={handleChange('width')} />
-      <InputForm label="Height" value={formValues.height} onChange={handleChange('height')} />
-      <InputForm label="Line Color" value={formValues.lineColor} onChange={handleChange('lineColor')} />
-      <InputForm label="Theme" value={formValues.theme} onChange={handleChange('theme')} />
-      <InputForm label="Tags" value={formValues.tags} onChange={handleChange('tags')} />
-      <InputForm label="Host" value={formValues.host} onChange={handleChange('host')} />
-      <InputForm label="Port" value={formValues.port} onChange={handleChange('port')} />
-      <InputForm label="Interval" value={formValues.interval} onChange={handleChange('interval')} />
-      <InputForm label="Test Length" value={formValues.testLength} onChange={handleChange('testLength')} />
-    </form>
     <h1>{backendResponse}</h1>
     </div>
   )
@@ -95,6 +82,19 @@ export default FormContainer;
 
 
 
+//     <form>
+//       <InputForm label="Title" value={formValues.title} onChange={handleChange('title')} />
+//       <InputForm label="X-Axis Label" value={formValues.xAxisLabel} onChange={handleChange('xAxisLabel')} />
+//       <InputForm label="Width" value={formValues.width} onChange={handleChange('width')} />
+//       <InputForm label="Height" value={formValues.height} onChange={handleChange('height')} />
+//       <InputForm label="Line Color" value={formValues.lineColor} onChange={handleChange('lineColor')} />
+//       <InputForm label="Theme" value={formValues.theme} onChange={handleChange('theme')} />
+//       <InputForm label="Tags" value={formValues.tags} onChange={handleChange('tags')} />
+//       <InputForm label="Host" value={formValues.host} onChange={handleChange('host')} />
+//       <InputForm label="Port" value={formValues.port} onChange={handleChange('port')} />
+//       <InputForm label="Interval" value={formValues.interval} onChange={handleChange('interval')} />
+//       <InputForm label="Test Length" value={formValues.testLength} onChange={handleChange('testLength')} />
+//     </form>
 
 
 

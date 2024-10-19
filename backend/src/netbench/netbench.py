@@ -65,6 +65,7 @@ class Netbench(Client):
         # store original stdout for later
         self._stdout_fd = os.dup(1)
         self._stderr_fd = os.dup(2)
+        self._stdin_fd = os.dup(0) # maybe not zero
         # redirect stdout, overwrites stdout with pipe_in
         # os.dup2(self._pipe_in, 1, inheritable=True)
         # os.dup2(self._pipe_in, 2)  # stderr
@@ -197,20 +198,28 @@ class Netbench(Client):
     def frontend_communicator(self):
         self.log("Frontend Communicator Started")
         while True:
-            time.sleep(0.5)
+            time.sleep(5)
+            self.log("loopfrom pipe")
             try:
-                # self.log("Frontend Pipe Polling")  # Line 202
-                if self.frontend_pipe.poll():  # Check if there is data to read
-                    self.log("Data available in frontend pipe")
-                    msg = self.frontend_pipe.recv()
-                    self.log(f"Frontend Message: {msg}")  # Line 205
-                    response = self.handle_frontend_message(msg)
-                    self.backend_pipe.send(json.dumps(response))
-                # else:
-                    # self.log("No data in frontend pipe")
+                msg = os.read(self._stdout_fd, 1024)
+                self.log(f"msg read {msg}")
+                self.write_to_stdout(json.dumps(msg))
             except Exception as e:
-                self.log(f"Frontend Communicator Error: {e}")
-                break
+                self.log(f"Exception wth {e}")
+            # try:
+            #     # self.log("Frontend Pipe Polling")  # Line 202
+            #     if self.frontend_pipe.poll():  # Check if there is data to read
+            #         self.log("Data available in frontend pipe")
+            #         msg = self.frontend_pipe.recv()
+            #         self.log(f"Frontend Message: {msg}")  # Line 205
+            #         response = self.handle_frontend_message(msg)
+            #         self.backend_pipe.send(json.dumps(response))
+            #     else:
+            #         self.write_to_stdout(json.dumps("MESSAGE BUTTTS"))
+            #         self.log("No data in frontend pipe")
+            # except Exception as e:
+            #     self.log(f"Frontend Communicator Error: {e}")
+            #     break
 
     def handle_frontend_message(self, msg):
         # Handle the message from the frontend and return a response
